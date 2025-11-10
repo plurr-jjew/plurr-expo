@@ -17,6 +17,7 @@ declare global {
   }
 }
 
+// TO DO: implement endpoints corresponding to envs
 const hostname = 'http://localhost:8787';
 
 /**
@@ -43,6 +44,11 @@ export const findLobbyByCode = async (
   }
 };
 
+/**
+ * 
+ * @param id 
+ * @param cb 
+ */
 export const getLobbyData = async (
   id: string,
   cb: (entry: LobbyEntry) => void
@@ -61,7 +67,12 @@ export const getLobbyData = async (
   }
 };
 
-
+/**
+ * 
+ * @param title 
+ * @param images 
+ * @param cb 
+ */
 export const submitNewLobby = async (
   title: string,
   images: ImageEntry[],
@@ -93,3 +104,18 @@ export const submitNewLobby = async (
     console.error(error);
   }
 };
+
+export const updateLobbyEntry =  async (title: string, deletedImages: string[]) => {
+  const formdata = new FormData();
+  formdata.append("title", title);
+  formdata.append("deletedImages", JSON.stringify(deletedImages));
+
+  const requestOptions = {
+    method: "PUT",
+    body: formdata,
+  };
+
+  const updateRes = await fetch(`${hostname}/lobby/id/5a6u464o6go1t696`, requestOptions);
+  return updateRes;
+};
+

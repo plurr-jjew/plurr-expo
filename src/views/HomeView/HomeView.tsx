@@ -13,7 +13,6 @@ const HomeView = () => {
   const [lobbyCode, setLobbyCode] = useState<string>('');
 
   const handleJoinLobby = () => {
-    // router.navigate(`/lobby/`);
     findLobbyByCode(
       lobbyCode,
       (lobbyId) => router.push(`/lobby/${lobbyId}`)

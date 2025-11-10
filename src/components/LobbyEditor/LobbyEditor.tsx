@@ -17,12 +17,14 @@ import ImageCarousel from '@/components/ImageCarousel';
 interface LobbyEditorProps {
   images: ImageEntry[];
   setImages: Dispatch<SetStateAction<ImageEntry[]>>;
+  onImageDelete?: (id: string) => void;
   scrollRef: any;
 }
 
 const LobbyEditor: React.FC<LobbyEditorProps> = ({
   images,
   setImages,
+  onImageDelete,
   scrollRef,
 }) => {
   const { width: SCREEN_WIDTH } = useWindowDimensions();
@@ -43,6 +45,13 @@ const LobbyEditor: React.FC<LobbyEditorProps> = ({
   const spacing = 8;
   const thumbnailSize = (SCREEN_WIDTH - spacing * (columns + 1)) / columns - 10;
 
+  const handleImageDelete = (id: string) => () => {
+    setImages((prev) => prev.filter((img) => img._id !== id));
+    if (onImageDelete) {
+      onImageDelete(id);
+    }
+  };
+
   const renderItem = useCallback<SortableGridRenderItem<ImageEntry>>(
     ({ item, index }) => (
       <TouchableOpacity
@@ -60,7 +69,7 @@ const LobbyEditor: React.FC<LobbyEditorProps> = ({
       >
         <Image source={{ uri: item.url }} className="rounded-xl w-full h-full" />
         <TouchableOpacity
-          onPress={() => setImages((prev) => prev.filter((img) => img._id !== item._id))}
+          onPress={handleImageDelete(item._id)}
           className="absolute top-1 right-1 bg-black/60 rounded-full p-1"
         >
           <Ionicons name="close" size={22} color="white" />
