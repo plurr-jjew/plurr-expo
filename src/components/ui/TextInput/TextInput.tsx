@@ -1,9 +1,9 @@
 import React, { Dispatch, SetStateAction } from 'react';
 import {
-  Pressable,
   Text,
   TextInput as _TextInput,
-  View
+  View,
+  TouchableOpacity
 } from 'react-native';
 
 interface TextInputProps {
@@ -11,6 +11,7 @@ interface TextInputProps {
   label: string;
   placeholder?: string;
   defaultValue: string;
+  maxLength?: number;
   onChangeText: Dispatch<SetStateAction<string>>;
   hasButton?: boolean;
   buttonTitle?: string;
@@ -22,6 +23,7 @@ const TextInput: React.FC<TextInputProps> = ({
   label,
   placeholder = '',
   defaultValue,
+  maxLength,
   onChangeText,
   hasButton = false,
   buttonTitle,
@@ -39,16 +41,17 @@ const TextInput: React.FC<TextInputProps> = ({
         <_TextInput
           className=""
           placeholder={placeholder}
+          maxLength={maxLength}
           onChangeText={onChangeText}
           defaultValue={defaultValue}
         />
         {hasButton ?
-          <Pressable
-            className="rounded-sm bg-blue-200 px-2 py-1"
+          <TouchableOpacity
+            className="rounded-md bg-blue-200 px-2 py-2"
             onPress={onButtonPress}
           >
             <Text>{buttonTitle}</Text>
-          </Pressable> :
+          </TouchableOpacity> :
           null
         }
       </View>

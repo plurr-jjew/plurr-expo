@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import { Pressable, Text } from 'react-native';
+import { TouchableOpacity, Text } from 'react-native';
 
 interface ButtonProps {
   className?: string;
@@ -14,23 +14,24 @@ const Button: React.FC<ButtonProps> = ({
   LeadingIcon,
   onPress,
 }) => (
-  <Pressable
+  <TouchableOpacity
     className={className ? ` ${className}` : ''}
     onPress={onPress}
     style={{
       display: 'flex',
+      gap: 5,
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
       borderRadius: 5,
       paddingHorizontal: 9,
-      paddingVertical: 5,
+      paddingVertical: 8,
       backgroundColor: '#acdfffff'
     }}
   >
     {LeadingIcon ? LeadingIcon : null}
     <Text>{title}</Text>
-  </Pressable>
+  </TouchableOpacity>
 );
 
 export default Button;

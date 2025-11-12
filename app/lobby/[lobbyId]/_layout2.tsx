@@ -1,13 +1,17 @@
 import 'react-native-gesture-handler';
 
 import { Slot } from 'expo-router';
+import ToastManager from 'toastify-react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 
 export default function Layout() {
   return (
-    <GestureHandlerRootView>
-      <Slot />
-    </GestureHandlerRootView>
+    <>
+      <GestureHandlerRootView>
+        <Slot />
+      </GestureHandlerRootView>
+      <ToastManager />
+    </>
   );
 }

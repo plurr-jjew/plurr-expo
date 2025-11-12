@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Text, View } from 'react-native';
 import { useRouter, Link } from 'expo-router';
+import { Toast } from 'toastify-react-native';
 
 import { findLobbyByCode } from '@/services/lobby';
 
@@ -13,10 +14,14 @@ const HomeView = () => {
   const [lobbyCode, setLobbyCode] = useState<string>('');
 
   const handleJoinLobby = () => {
-    findLobbyByCode(
-      lobbyCode,
-      (lobbyId) => router.push(`/lobby/${lobbyId}`)
-    );
+    if (/^[A-Za-z0-9]{6}$/.test(lobbyCode)) {
+      findLobbyByCode(
+        lobbyCode,
+        (lobbyId) => router.push(`/lobby/${lobbyId}`)
+      );
+    } else {
+      Toast.error('Please enter valid code');
+    }
   };
 
   return (
@@ -27,6 +32,7 @@ const HomeView = () => {
         label="Lobby Code"
         placeholder="ABC123"
         defaultValue={lobbyCode}
+        maxLength={6}
         onChangeText={setLobbyCode}
         hasButton
         buttonTitle='Join'

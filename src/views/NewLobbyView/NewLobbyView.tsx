@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
-import { View, Text, Alert, } from 'react-native';
+import { View, Text, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
-
-import * as ImagePicker from "expo-image-picker";
-import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
+import { Toast } from 'toastify-react-native';
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 import { submitNewLobby } from '@/services/lobby';
+import { pickImages } from '@/utils/imagePicker';
+
 import LobbyEditor from '@/components/LobbyEditor';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import Button from '@/components/ui/Button';
 import TextInput from '@/components/ui/TextInput';
+import Switch from '@/components/ui/Switch';
 
 const NewLobbyView: React.FC = () => {
   const scrollableRef = useAnimatedRef<Animated.ScrollView>();
@@ -20,77 +22,76 @@ const NewLobbyView: React.FC = () => {
 
   const [images, setImages] = useState<ImageEntry[]>([]);
   const [title, setTitle] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
+  const [viewersCanEdit, setViewersCanEdit] = useState<boolean>(true);
+  const [loadingMsg, setLoadingMsg] = useState<string | null>(null);
 
-  const pickImages = async () => {
-    setLoading(true);
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permissionResult.granted) {
-      Alert.alert("Permission required", "Please allow photo access to upload images.");
-      setLoading(false);
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsMultipleSelection: true,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      const formatPromises = result.assets.map(async (asset) => {
-        const context = ImageManipulator.manipulate(asset.uri);
-        context.resize({ height: 2000 });
-        const image = await context.renderAsync();
-        const result = await image.saveAsync({
-          format: SaveFormat.JPEG,
-          compress: 0.8,
-        });
-        return {
-          _id: asset.assetId ?? asset.uri + Date.now(),
-          url: result.uri,
-        };
-      });
-      const newImages = await Promise.all(formatPromises);
+  const handlePickImages = async () => {
+    setLoadingMsg('Processing images...');
+    await pickImages((err, newImages) => {
+      if (err || !newImages) {
+        Toast.error('Failed to add images.');
+        return;
+      }
       setImages((prev) => [...prev, ...newImages]);
-    }
-    setLoading(false);
+      Toast.success(`Added ${newImages.length} images`);
+    });
+    setLoadingMsg(null);
   };
 
   const handleCreateLobby = async () => {
+    if (title === '') {
+      Toast.error('Please name lobby');
+      return;
+    }
+    setLoadingMsg('Creating lobby...');
     await submitNewLobby(
       title,
+      viewersCanEdit,
       images,
       (lobbyId) => router.push(`/lobby/${lobbyId}`)
     );
+    setLoadingMsg(null);
   };
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView className="flex h-screen w-screen" edges={['top']}>
+      <SafeAreaView className="h-screen w-screen" edges={['top']}>
+        <LoadingOverlay show={loadingMsg !== null} text={loadingMsg} />
         <Animated.ScrollView
           ref={scrollableRef}
-          style={{ height: '100%', width: '100%' }}
+          style={{ height: '100%', width: '100%', paddingVertical: 15 }}
         >
-          <View className="flex items-center px-5">
-            <Text className="text-3xl font-bold mb-6">New Lobby</Text>
+          <Text className="text-3xl text-center font-bold mb-6">
+            New Lobby
+          </Text>
+          <View className="flex items-center gap-4 px-5">
             <TextInput
-              className="mb-4"
               label="Lobby Name"
               defaultValue={title}
+              maxLength={50}
               onChangeText={setTitle}
               hasButton
               buttonTitle="Create"
               onButtonPress={handleCreateLobby}
             />
+            <Switch
+              label="Viewers can edit"
+              value={viewersCanEdit}
+              onChange={() => setViewersCanEdit((previousState) => !previousState)}
+            />
             <Button
               className="mb-3"
-              title="Upload Images"
+              title="Add Images"
               LeadingIcon={<MaterialCommunityIcons name="file-image-plus" size={24} color="black" />}
-              onPress={pickImages}
+              onPress={handlePickImages}
             />
           </View>
-          <LobbyEditor images={images} setImages={setImages} scrollRef={scrollableRef} />
+          <LobbyEditor
+            images={images}
+            setImages={setImages}
+            scrollRef={scrollableRef}
+            isLoading={loadingMsg == null}
+          />
         </Animated.ScrollView>
       </SafeAreaView>
     </SafeAreaProvider>

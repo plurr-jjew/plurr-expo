@@ -19,6 +19,7 @@ interface LobbyEditorProps {
   setImages: Dispatch<SetStateAction<ImageEntry[]>>;
   onImageDelete?: (id: string) => void;
   scrollRef: any;
+  isLoading?: boolean;
 }
 
 const LobbyEditor: React.FC<LobbyEditorProps> = ({
@@ -26,6 +27,7 @@ const LobbyEditor: React.FC<LobbyEditorProps> = ({
   setImages,
   onImageDelete,
   scrollRef,
+  isLoading = false,
 }) => {
   const { width: SCREEN_WIDTH } = useWindowDimensions();
 

@@ -1,9 +1,13 @@
-import React from 'react';
-import { View, Text, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text } from 'react-native';
 import { Link } from 'expo-router';
+import { Toast } from 'toastify-react-native';
 
+import { addImagesToLobby } from '@/services/lobby';
+import { pickImages } from '@/utils/imagePicker';
 import ImageGallery from '@/components/ImageGallery';
 import Button from '@/components/ui/Button';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
 interface ImageGalleryViewProps {
   _id: string;
@@ -26,16 +30,42 @@ const ImageGalleryView: React.FC<ImageGalleryViewProps> = ({
   ownerId,
   title,
   lobbyCode,
-  images,
+  images: initialImages,
   viewersCanEdit,
 }) => {
+  const [images, setImages] = useState<ImageEntry[]>(initialImages);
+  const [loading, setLoading] = useState<boolean>(false);
+  const onPickImage = async (err: Error | null, newImages: ImageEntry[] | null) => {
+    if (err || !newImages) {
+      Toast.error('Failed to add images.');
+      return;
+    }
+    await addImagesToLobby(_id, newImages, (err, _newImages: ImageEntry[] | null) => {
+      if (err || !_newImages) {
+        Toast.error('Failed to add images.');
+        return;
+      }
+      setImages((prev) => [...prev, ..._newImages]);
+      Toast.success(`Added ${_newImages.length} images`)
+    });
+  };
+
+  const handleAddImages = async () => {
+    setLoading(true);
+    await pickImages(onPickImage);
+    setLoading(false);
+  };
 
   return (
-    <View className="items-center flex-1 justify-center bg-white gap-2">
+    <View className="relative flex justify-center items-center flex-1 px-2 py-2 bg-white gap-2">
+      <LoadingOverlay show={loading} />
       <Text className="text-3xl font-bold mb-4">{title}</Text>
-      <Link href={`/lobby/${_id}/edit`} asChild>
-        <Button title="Edit" />
-      </Link>
+      <View className="flex flex-row gap-2 justify-center align-center">
+        <Link href={`/lobby/${_id}/edit`} asChild>
+          <Button title="Edit" />
+        </Link>
+        <Button title="Add images" onPress={handleAddImages} />
+      </View>
       <ImageGallery images={images.map((image) => `${hostname}/image/${_id}/${image._id}`)} />
     </View>
   );

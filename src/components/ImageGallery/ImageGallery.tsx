@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   View,
+  ScrollView,
   Image,
   TouchableOpacity,
   Modal,
@@ -60,7 +61,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, spacing = 4 }) => {
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#fff' }}>
+    <ScrollView style={{ flex: 1, backgroundColor: '#fff' }}>
       <FlatList
         key={`flatlist-${columns}cols`}
         data={images}
@@ -75,13 +76,13 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, spacing = 4 }) => {
 
       <Modal
         visible={modalVisible}
-        transparent={false}
+        transparent
         animationType="fade"
         onRequestClose={closeModal}
       >
         <ImageCarousel images={images} initialSelectedIndex={selectedIndex} closeModal={closeModal} />
       </Modal>
-    </View>
+    </ScrollView>
   );
 };
 
