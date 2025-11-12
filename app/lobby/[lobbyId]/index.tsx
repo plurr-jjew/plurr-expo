@@ -26,7 +26,7 @@ const LobbyPage = () => {
 
   useEffect(() => {
     handleGetData();
-  }, []);
+  }, [lobbyId]);
 
   if (lobbyData) {
     return (

@@ -31,7 +31,7 @@ const LoadingOverlay: React.FC<LoadingProps> = ({
 const styles = StyleSheet.create({
   loadingContainer: {
     position: 'absolute',
-    zIndex: 1000,
+    zIndex: 5000,
     width: '100%',
     height: '100%',
     justifyContent: 'center',

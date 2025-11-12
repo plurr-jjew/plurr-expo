@@ -16,7 +16,11 @@ import Button from '@/components/ui/Button';
 import TextInput from '@/components/ui/TextInput';
 import Switch from '@/components/ui/Switch';
 
-const NewLobbyView: React.FC = () => {
+interface NewLobbyProps {
+  userId: string;
+}
+
+const NewLobbyView: React.FC<NewLobbyProps> = ({ userId }) => {
   const scrollableRef = useAnimatedRef<Animated.ScrollView>();
   const router = useRouter();
 
@@ -45,12 +49,16 @@ const NewLobbyView: React.FC = () => {
     }
     setLoadingMsg('Creating lobby...');
     await submitNewLobby(
+      userId,
       title,
       viewersCanEdit,
       images,
       (lobbyId) => router.push(`/lobby/${lobbyId}`)
     );
     setLoadingMsg(null);
+    setImages([]);
+    setTitle('');
+    setViewersCanEdit(true);
   };
 
   return (
@@ -59,15 +67,16 @@ const NewLobbyView: React.FC = () => {
         <LoadingOverlay show={loadingMsg !== null} text={loadingMsg} />
         <Animated.ScrollView
           ref={scrollableRef}
-          style={{ height: '100%', width: '100%', paddingVertical: 15 }}
+          style={{ height: '100%', width: '100%', paddingVertical: 25 }}
         >
-          <Text className="text-3xl text-center font-bold mb-6">
-            New Lobby
+          <Text className="text-xl text-center mb-6">
+            Add images to{`\n`}
+            make this yours!
           </Text>
           <View className="flex items-center gap-4 px-5">
             <TextInput
               label="Lobby Name"
-              defaultValue={title}
+              value={title}
               maxLength={50}
               onChangeText={setTitle}
               hasButton
@@ -75,14 +84,16 @@ const NewLobbyView: React.FC = () => {
               onButtonPress={handleCreateLobby}
             />
             <Switch
+              className="mb-4"
               label="Viewers can edit"
               value={viewersCanEdit}
               onChange={() => setViewersCanEdit((previousState) => !previousState)}
             />
             <Button
               className="mb-3"
+              fullWidth
               title="Add Images"
-              LeadingIcon={<MaterialCommunityIcons name="file-image-plus" size={24} color="black" />}
+              LeadingIcon={<MaterialCommunityIcons name="file-image-plus" size={24} color="white" />}
               onPress={handlePickImages}
             />
           </View>

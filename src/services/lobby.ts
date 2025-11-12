@@ -1,5 +1,7 @@
+import { Platform } from 'react-native';
 import { Toast } from 'toastify-react-native';
 
+import { authClient } from './auth';
 import { addImagesToFormData } from '@/utils/lobby';
 
 declare global {
@@ -7,7 +9,8 @@ declare global {
     _id: string;
     lobbyCode: string;
     createdOn: string;
-    firstUploadOn: string;
+    firstUploadOn: string | null;
+    firstImageId?: string;
     ownerId: string;
     title: string;
     viewersCanEdit: boolean;
@@ -32,7 +35,6 @@ const hostname = 'http://localhost:8787';
 export const findLobbyByCode = async (
   code: string,
   cb: (id: string) => void
-
 ): Promise<void> => {
   try {
     const requestOptions = {
@@ -53,6 +55,29 @@ export const findLobbyByCode = async (
   } catch (error) {
     console.error(error);
     Toast.error('Failed to get lobby info.');
+  }
+};
+
+export const getUserLobbies = async (
+  userId: string,
+  cb: (err: Error | null, lobbyList: LobbyEntry[] | null) => void,
+): Promise<void> => {
+  try {
+    const requestOptions = {
+      method: 'GET',
+    };
+
+    const lobbyRes = await fetch(`${hostname}/lobby/user/${userId}`, requestOptions);
+    if (lobbyRes.status !== 200) {
+      cb(new Error('Failed to get lobbies'), null);
+      return;
+    }
+
+    const lobbyList = await lobbyRes.json();
+    cb(null, lobbyList);
+  } catch (error) {
+    console.error(error);
+    cb(new Error('Failed to get lobbies'), null);
   }
 };
 
@@ -92,6 +117,7 @@ export const getLobbyData = async (
  * @param cb 
  */
 export const submitNewLobby = async (
+  userId: string,
   title: string,
   viewersCanEdit: boolean,
   images: ImageEntry[],
@@ -99,15 +125,31 @@ export const submitNewLobby = async (
 ) => {
   try {
     const formdata = new FormData();
-    formdata.append('ownerId', 'test');
+    formdata.append('ownerId', userId);
     formdata.append('viewersCanEdit', viewersCanEdit.toString());
     formdata.append('title', title);
 
     await addImagesToFormData(formdata, images);
+    let cookies;
+    if (Platform.OS === 'web') {
+      cookies = await window.cookieStore.getAll();
+      const { data: session, error } = await authClient.getSession();
+      if (session) {
+        const sessionToken = session.session.token;
+        console.log(session);
+      }
+    }
+    else {
+      cookies = authClient.getCookie();
+    }
 
     const requestOptions = {
       method: 'POST',
       body: formdata,
+      credentials: 'omit' as RequestCredentials,
+      headers: {
+        'Cookie': cookies,
+      },
     };
 
     const submitRes = await fetch(`${hostname}/lobby`, requestOptions);
@@ -198,7 +240,7 @@ export const addImagesToLobby = async (
 
 export const deleteLobbyEntry = async (
   lobbyId: string,
-  cb: (err: Error | null) => void, 
+  cb: (err: Error | null) => void,
 ) => {
   try {
     const requestOptions = {
@@ -207,7 +249,7 @@ export const deleteLobbyEntry = async (
 
     await fetch(`${hostname}/lobby/id/${lobbyId}`, requestOptions);
     cb(null);
-  } catch(error) {
+  } catch (error) {
     console.error(error);
   }
 };

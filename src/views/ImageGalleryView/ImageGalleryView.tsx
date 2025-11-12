@@ -12,7 +12,7 @@ import LoadingOverlay from '@/components/ui/LoadingOverlay';
 interface ImageGalleryViewProps {
   _id: string;
   createdOn: string;
-  firstUploadOn: string;
+  firstUploadOn: string | null;
   ownerId: string;
   title: string;
   lobbyCode: string;

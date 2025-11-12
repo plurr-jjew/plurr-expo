@@ -47,7 +47,6 @@ const EditLobbyView: React.FC<EditLobbyProps> = ({
         Toast.error('Failed to delete lobby.');
         return;
       }
-      console.log('success')
       Toast.success('Deleted lobby!');
       router.push('/');
     });
@@ -79,7 +78,7 @@ const EditLobbyView: React.FC<EditLobbyProps> = ({
           <View className="flex items-center px-5 gap-4">
             <TextInput
               label="Lobby Name"
-              defaultValue={title}
+              value={title}
               maxLength={50}
               onChangeText={setTitle}
             />
@@ -91,7 +90,7 @@ const EditLobbyView: React.FC<EditLobbyProps> = ({
             />
             <Button
               title="Save changes"
-              LeadingIcon={<Entypo name="save" size={24} color="black" />}
+              LeadingIcon={<Entypo name="save" size={24} color="white" />}
               onPress={handleSubmitChanges}
             />
           </View>

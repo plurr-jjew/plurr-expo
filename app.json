@@ -3,7 +3,7 @@
     "name": "plurr-expo",
     "slug": "plurr-expo",
     "version": "1.0.0",
-    "scheme": "your-app-scheme",
+    "scheme": "plurr",
     "web": {
       "bundler": "metro",
       "favicon": "./assets/favicon.png"
@@ -12,7 +12,15 @@
       "tsconfigPaths": true
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-asset",
+        {
+          "assets": [
+            "./assets/images/plurr-logo.png"
+          ]
+        }
+      ]
     ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
