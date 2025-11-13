@@ -146,6 +146,7 @@ export const submitNewLobby = async (
     const requestOptions = {
       method: 'POST',
       body: formdata,
+      'Content-Type': 'multipart/form-data',
       credentials: 'omit' as RequestCredentials,
       headers: {
         'Cookie': cookies,

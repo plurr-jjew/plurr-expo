@@ -4,7 +4,7 @@ import { TouchableOpacity, StyleSheet } from 'react-native';
 interface IconButtonProps {
   className?: string;
   Icon: ReactElement<any, any>;
-  onPress: () => void;
+  onPress?: () => void;
 }
 
 const IconButton: React.FC<IconButtonProps> = ({

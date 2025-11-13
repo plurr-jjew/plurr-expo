@@ -75,9 +75,10 @@ const EditLobbyView: React.FC<EditLobbyProps> = ({
             Icon={<MaterialIcons name="delete" size={24} color="black" />}
             onPress={handleDelete}
           />
-          <View className="flex items-center px-5 gap-4">
+          <View className="flex items-center px-10 gap-4">
             <TextInput
               label="Lobby Name"
+              fullWidth
               value={title}
               maxLength={50}
               onChangeText={setTitle}
@@ -90,7 +91,7 @@ const EditLobbyView: React.FC<EditLobbyProps> = ({
             />
             <Button
               title="Save changes"
-              LeadingIcon={<Entypo name="save" size={24} color="white" />}
+              LeadingIcon={<Entypo name="save" size={20} color="white" />}
               onPress={handleSubmitChanges}
             />
           </View>

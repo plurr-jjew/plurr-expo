@@ -20,6 +20,15 @@
             "./assets/images/plurr-logo.png"
           ]
         }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/dubsteptrix.ttf",
+            "./assets/fonts/AkkuratMono-Regular.ttf"
+          ]
+        }
       ]
     ],
     "orientation": "portrait",

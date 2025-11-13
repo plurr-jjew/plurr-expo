@@ -1,5 +1,5 @@
 import React from 'react';
-import { Switch as _Switch, View, Text } from 'react-native';
+import { StyleSheet, Switch as _Switch, View, Text } from 'react-native';
 
 interface SwitchProps {
   className?: string;
@@ -14,17 +14,29 @@ const Switch: React.FC<SwitchProps> = ({
   onChange,
   label,
 }) => {
-  const viewClassName = `flex flex-row gap-2${className ? ` ${className}` : ''}`;
 
   return (
-    <View className={viewClassName}>
+    <View className={className} style={styles.switchContainer}>
       <_Switch
         onValueChange={onChange}
         value={value}
       />
-      <Text>{label}</Text>
+      <Text style={styles.labelText}>{label}</Text>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  switchContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10
+  },
+  labelText: {
+    fontFamily: 'AkkuratMono'
+  }
+
+})
 
 export default Switch;

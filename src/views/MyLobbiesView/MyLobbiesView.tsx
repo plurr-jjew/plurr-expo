@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Link } from 'expo-router';
 
 import LobbyGallery from '@/components/LobbyGallery/LobbyGallery';
@@ -11,19 +11,27 @@ interface MyLobbiesProps {
 
 const MyLobbiesView: React.FC<MyLobbiesProps> = ({ lobbies }) => {
   return (
-    <ScrollView style={{ padding: 10 }}>
-      <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-        <Link href="/new-lobby" asChild>
-          <Button
-            className="mt-2 mb-5"
-            fullWidth
-            title="New Lobby"
-          />
-        </Link>
-        <LobbyGallery lobbies={lobbies} />
-      </View>
-    </ScrollView>
+    <View style={styles.container}>
+      <Link href="/new-lobby" asChild>
+        <Button
+          className="mt-2 mb-5"
+          fullWidth
+          title="New Lobby"
+        />
+      </Link>
+      <LobbyGallery lobbies={lobbies} />
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    display: 'flex',
+    justifyContent: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 12,
+    flex: 1,
+  }
+});
 
 export default MyLobbiesView;

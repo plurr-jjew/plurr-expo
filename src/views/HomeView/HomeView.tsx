@@ -33,7 +33,7 @@ const HomeView = () => {
 
   return (
     <View className="items-center relative flex-1 justify-center px-5 py-2 gap-2">
-      {/* {!session ?
+      {!session ?
         <Link href="/login" asChild>
           <Button
             className="absolute top-2 right-2"
@@ -47,13 +47,18 @@ const HomeView = () => {
           variant="text"
           onPress={handleSignOut}
         />
-      } */}
+      }
       <Image
         source={require('@/../assets/images/plurr-logo.png')}
         style={{ width: 200, height: 100}}
         contentFit='contain'
       />
-      <Text className="text-md text-center mb-4">
+      <Text style={{
+        fontFamily: 'dubsteptrix',
+        textAlign: 'center',
+        fontSize: 18,
+        marginBottom: 50,
+      }}>
         Do Now.{`\n`}
         Connect Later.
       </Text>

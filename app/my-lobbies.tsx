@@ -22,10 +22,12 @@ const MyLobbiesPage: React.FC = () => {
         setLobbies(lobbyList);
       });
     }
-  }, [session, isPending]);
+    if (!session && !isPending) {
+      Toast.error('Please login.');
+    }
+  }, [session, isPending, rootNavigationState]);
 
   if (rootNavigationState?.key && !session?.user.id && !isPending) {
-    Toast.error('Please login.');
     return <Redirect href="/" />;
   }
   if (!session?.user.id) {

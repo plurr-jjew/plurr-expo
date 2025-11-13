@@ -27,7 +27,7 @@ export const pickImages = async (
         compress: 0.8,
       });
       return {
-        _id: asset.assetId ?? asset.uri + Date.now(),
+        _id: asset.assetId ? asset.assetId + Date.now() : asset.uri + Date.now(),
         url: result.uri,
       };
     });

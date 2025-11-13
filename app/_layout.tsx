@@ -1,6 +1,9 @@
 import 'react-native-gesture-handler';
 
+import React, { useEffect } from 'react';
 import { View, Text } from 'react-native';
+import * as SplashScreen from 'expo-splash-screen';
+import { useFonts } from 'expo-font';
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
@@ -16,16 +19,22 @@ export default function Layout() {
   const { data: session, isPending } = authClient.useSession();
   const header = (title: string | null, showImage: boolean, showLogin: boolean) => (
     <>
-      <View className="flex flex-row justify-center items-center gap-3">
+      <View className="flex flex-row justify-center items-center gap-2">
         {showImage ?
           <Image
             source={require('@/../assets/images/plurr-logo.png')}
-            style={{ width: 100, height: 50 }}
+            style={{ width: 85, height: 40 }}
             contentFit='contain'
           /> : null
         }
-        {title ? <Text>{title}</Text> : null}
-
+        {title ?
+          <Text style={{
+            fontFamily: 'dubsteptrix',
+            fontSize: 16
+          }}>
+            {title}
+          </Text> : null
+        }
       </View>
       {!session && !isPending && showLogin ?
         <Link className="fixed right-0" href="/login" asChild>
@@ -38,6 +47,20 @@ export default function Layout() {
     </>
   );
 
+  const [loaded, error] = useFonts({
+    'dubsteptrix': require('@/../assets/fonts/dubsteptrix.ttf'),
+    'AkkuratMono': require('@/../assets/fonts/AkkuratMono-Regular.ttf')
+  });
+
+  useEffect(() => {
+    if (loaded || error) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded, error]);
+
+  if (!loaded && !error) {
+    return null;
+  }
 
   return (
     <>
@@ -57,14 +80,14 @@ export default function Layout() {
           <Drawer.Screen
             name="new-lobby" // This is the name of the page and must match the url from root
             options={{
-              drawerLabel: 'Create Lobby',
+              drawerLabel: () => <Text style={{ fontFamily: 'AkkuratMono' }}>Create Lobby</Text>,
               headerTitle: () => header('Create Lobby', true, false)
             }}
           />
           <Drawer.Screen
             name="my-lobbies" // This is the name of the page and must match the url from root
             options={{
-              drawerLabel: 'My Lobbies',
+              drawerLabel: () => <Text style={{ fontFamily: 'AkkuratMono' }}>My Lobbies</Text>,
               headerTitle: () => header('My Lobbies', true, true)
             }}
           />
@@ -78,7 +101,7 @@ export default function Layout() {
           <Drawer.Screen
             name="login"
             options={{
-              drawerLabel: () => <Text>Login</Text>,
+              drawerLabel: () => <Text style={{ fontFamily: 'AkkuratMono' }}>Login</Text>,
               drawerItemStyle: {
                 display: session ? 'none' : 'flex',
                 marginTop: 60,
@@ -89,12 +112,13 @@ export default function Layout() {
           <Drawer.Screen
             name="logout"
             options={{
-              drawerLabel: () => <Text className="opacity-50">Logout</Text>,
+              drawerLabel: () => <Text style={{ fontFamily: 'AkkuratMono' }} className="opacity-50">Logout</Text>,
               drawerItemStyle: {
                 display: !session ? 'none' : 'flex',
                 marginTop: 60,
               },
-              headerTitle: () => header('', false, false)
+              headerTitle: () => header('', false, false),
+              lazy: true,
             }}
           />
           <Drawer.Screen
@@ -106,7 +130,7 @@ export default function Layout() {
           />
         </Drawer>
       </GestureHandlerRootView>
-      {/* <ToastManager /> */}
+      <ToastManager textStyle={{ fontFamily: 'AkkuratMono' }} useModal={false} />
     </>
   );
 }

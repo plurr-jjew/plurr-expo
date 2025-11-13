@@ -93,6 +93,7 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   text: {
+    fontFamily: 'AkkuratMono',
     fontSize: 18,
     fontWeight: '600',
   },

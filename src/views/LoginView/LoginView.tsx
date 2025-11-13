@@ -69,7 +69,7 @@ const LoginView: React.FC = () => {
         return;
       }
       Toast.success('Signed in!');
-      router.replace('/');
+      router.push('/');
     }
   };
 
@@ -92,7 +92,7 @@ const LoginView: React.FC = () => {
           <Text style={styles.subtitle}>Enter your phone number to continue</Text>
           <TextInput
             fullWidth
-            placeholder="555-123-4567"
+            placeholder="212-555-4567"
             value={phone}
             onChangeText={handlePhoneChange}
             keyboardType="phone-pad"

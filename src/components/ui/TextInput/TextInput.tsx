@@ -53,7 +53,7 @@ const TextInput: React.FC<TextInputProps> = ({
       style={[styles.view, fullWidth && styles.fullWidth]}
     >
       {label ?
-        <Text className="text-xs mb-1">{label}</Text> : null
+        <Text style={styles.labelText}>{label}</Text> : null
       }
       <View style={[
         styles.textInputView,
@@ -97,9 +97,15 @@ const styles = StyleSheet.create({
   fullWidth: {
     width: '100%',
   },
+  labelText: {
+    fontFamily: 'AkkuratMono',
+    marginBottom: 2,
+    marginLeft: 15,
+  },
   textInputView: {
     display: 'flex',
     flexDirection: 'row',
+    minWidth: 250,
     width: '100%',
     height: 56,
     backgroundColor: '#fff',
@@ -119,6 +125,7 @@ const styles = StyleSheet.create({
   },
   textInput: {
     height: '100%',
+    fontFamily: 'AkkuratMono',
     outlineStyle: 'none' as any,
     fontSize: 18,
   },
@@ -137,6 +144,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#FFF',
+    fontFamily: 'AkkuratMono',
     fontWeight: 600,
     fontSize: 16
   },

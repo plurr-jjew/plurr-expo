@@ -13,6 +13,8 @@ const LobbyPage = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const handleGetData = async () => {
+    setLoading(true);
+
     await getLobbyData(lobbyId.toString(), (err, entry) => {
       setLoading(false);
       if (err) {
@@ -23,14 +25,18 @@ const LobbyPage = () => {
       }
     });
   }
+  console.log('lobbyData', lobbyData)
 
   useEffect(() => {
     handleGetData();
+    console.log('useEffect hit');
   }, [lobbyId]);
+  console.log('isLoading', loading);
+  if (loading) return null;
 
   if (lobbyData) {
     return (
-      <ImageGalleryView {...lobbyData} />
+      <ImageGalleryView {...lobbyData} initialImages={lobbyData.images} />
     );
   }
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Alert } from 'react-native';
+import { View, Text, StyleSheet, DimensionValue } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
@@ -60,6 +60,7 @@ const NewLobbyView: React.FC<NewLobbyProps> = ({ userId }) => {
     setTitle('');
     setViewersCanEdit(true);
   };
+  console.log(images)
 
   return (
     <SafeAreaProvider>
@@ -67,46 +68,67 @@ const NewLobbyView: React.FC<NewLobbyProps> = ({ userId }) => {
         <LoadingOverlay show={loadingMsg !== null} text={loadingMsg} />
         <Animated.ScrollView
           ref={scrollableRef}
-          style={{ height: '100%', width: '100%', paddingVertical: 25 }}
+          style={{ height: '100%', width: '100%' }}
         >
-          <Text className="text-xl text-center mb-6">
-            Add images to{`\n`}
-            make this yours!
-          </Text>
-          <View className="flex items-center gap-4 px-5">
-            <TextInput
-              label="Lobby Name"
-              value={title}
-              maxLength={50}
-              onChangeText={setTitle}
-              hasButton
-              buttonTitle="Create"
-              onButtonPress={handleCreateLobby}
-            />
-            <Switch
-              className="mb-4"
-              label="Viewers can edit"
-              value={viewersCanEdit}
-              onChange={() => setViewersCanEdit((previousState) => !previousState)}
-            />
-            <Button
-              className="mb-3"
-              fullWidth
-              title="Add Images"
-              LeadingIcon={<MaterialCommunityIcons name="file-image-plus" size={24} color="white" />}
-              onPress={handlePickImages}
+          <View style={{
+            display: 'flex',
+            minHeight: '100%',
+            width: '100%',
+            paddingVertical: 30,
+            justifyContent: images.length === 0 ? 'center' : 'flex-start',
+          }}>
+            <Text
+              style={{
+                display: images.length === 0 ? 'flex' : 'none',
+                justifyContent: 'center',
+                fontFamily: 'dubsteptrix',
+                fontSize: 24,
+                lineHeight: 30,
+              }}
+              className="text-xl text-center mb-10">
+              Add images to{`\n`}
+              make this yours!
+            </Text>
+            <View className="flex items-center gap-4 px-16">
+              <TextInput
+                label="Lobby Name"
+                value={title}
+                fullWidth
+                maxLength={50}
+                onChangeText={setTitle}
+                hasButton
+                buttonTitle="Create"
+                onButtonPress={handleCreateLobby}
+              />
+              <Switch
+                className="mb-4"
+                label="Viewers can edit"
+                value={viewersCanEdit}
+                onChange={() => setViewersCanEdit((previousState) => !previousState)}
+              />
+              <Button
+                className="mb-3"
+                fullWidth
+                title="Add Images"
+                LeadingIcon={<MaterialCommunityIcons name="file-image-plus" size={24} color="white" />}
+                onPress={handlePickImages}
+              />
+            </View>
+            <LobbyEditor
+              images={images}
+              setImages={setImages}
+              scrollRef={scrollableRef}
+              isLoading={loadingMsg == null}
             />
           </View>
-          <LobbyEditor
-            images={images}
-            setImages={setImages}
-            scrollRef={scrollableRef}
-            isLoading={loadingMsg == null}
-          />
         </Animated.ScrollView>
       </SafeAreaView>
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+
+});
 
 export default NewLobbyView;

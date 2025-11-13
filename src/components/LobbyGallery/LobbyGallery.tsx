@@ -45,7 +45,7 @@ const LobbyGallery: React.FC<LobbyGalleryProps> = ({ lobbies, spacing = 10 }) =>
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
-          gap: 5,
+          gap: 10,
           borderRadius: 8,
           backgroundColor: '#b5b5b5ff',
           overflow: 'hidden',
@@ -61,7 +61,9 @@ const LobbyGallery: React.FC<LobbyGalleryProps> = ({ lobbies, spacing = 10 }) =>
           /> :
           <>
             <MaterialIcons name="hide-image" size={40} color="white" />
-            <Text style={{ color: '#454545ff' }}>Empty</Text>
+            <Text style={{ fontFamily: 'dubsteptrix', color: '#454545ff' }}>
+              Empty
+            </Text>
           </>
         }
         <View style={{
@@ -79,6 +81,7 @@ const LobbyGallery: React.FC<LobbyGalleryProps> = ({ lobbies, spacing = 10 }) =>
             fontWeight: 600,
             fontSize: 16,
             textAlign: 'left',
+            fontFamily: 'AkkuratMono',
           }}>
             {item.title}
           </Text>
@@ -88,7 +91,7 @@ const LobbyGallery: React.FC<LobbyGalleryProps> = ({ lobbies, spacing = 10 }) =>
   );
 
   return (
-    <ScrollView style={{ flex: 1 }}>
+     <ScrollView style={{ flex: 1 }}>
       <FlatList
         key={`flatlist-${columns}cols`}
         data={lobbies}
@@ -100,8 +103,7 @@ const LobbyGallery: React.FC<LobbyGalleryProps> = ({ lobbies, spacing = 10 }) =>
         }}
         showsVerticalScrollIndicator={false}
       />
-
-    </ScrollView>
+     </ScrollView>
   );
 };
 

@@ -97,14 +97,14 @@ const LobbyEditor: React.FC<LobbyEditorProps> = ({
   };
 
   return (
-    <View className="px-2 py-3">
+    <View className="px-2 py-8">
       <Sortable.Grid
         keyExtractor={(image) => image._id}
         columns={columns}
         data={images}
         renderItem={renderItem}
         rowGap={10}
-        columnGap={12}
+        columnGap={15}
         onDragEnd={({ data }) => setImages(data)}
         scrollableRef={scrollRef} // required for auto scroll
         overflow='visible'
