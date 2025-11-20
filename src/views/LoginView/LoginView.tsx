@@ -15,6 +15,7 @@ import { authClient } from '@/services/auth';
 import TextInput from '@/components/ui/TextInput';
 import Button from '@/components/ui/Button';
 import CodeInput from '@/components/ui/CodeInput';
+import { GradientBackground } from '@/components/ui/Gradients';
 
 type Screen = 'phone' | 'otp';
 
@@ -87,9 +88,10 @@ const LoginView: React.FC = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
       >
+        <GradientBackground color="#6f6f6fff" />
         <View style={styles.content}>
           <Text style={styles.title}>Login</Text>
-          <Text style={styles.subtitle}>Enter your phone number to continue</Text>
+          <Text style={styles.subtitle}>Enter your phone number{`\n`}to send code to</Text>
           <TextInput
             fullWidth
             placeholder="212-555-4567"
@@ -114,10 +116,11 @@ const LoginView: React.FC = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
+      <GradientBackground color="#7e8f9bff" />
       <View style={styles.content}>
         <Text style={styles.title}>Verify Code</Text>
         <Text style={styles.subtitle}>
-          Enter the 6-digit code sent to {phone}
+          Enter the 6-digit code sent to{`\n`}{phone}
         </Text>
         <CodeInput value={otp} onChange={handleOtpChange} />
 
@@ -146,15 +149,17 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 30,
   },
   title: {
-    fontSize: 32,
+    fontFamily: 'dubsteptrix',
+    fontSize: 40,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 10,
+    marginBottom: 25,
   },
   subtitle: {
+    fontFamily: 'AkkuratMono',
     fontSize: 16,
     color: '#666',
     marginBottom: 40,

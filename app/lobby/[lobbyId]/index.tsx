@@ -25,13 +25,11 @@ const LobbyPage = () => {
       }
     });
   }
-  console.log('lobbyData', lobbyData)
 
   useEffect(() => {
     handleGetData();
-    console.log('useEffect hit');
   }, [lobbyId]);
-  console.log('isLoading', loading);
+
   if (loading) return null;
 
   if (lobbyData) {

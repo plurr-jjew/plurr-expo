@@ -10,17 +10,28 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { submitNewLobby } from '@/services/lobby';
 import { pickImages } from '@/utils/imagePicker';
 
+import { GradientBackground } from '@/components/ui/Gradients';
 import LobbyEditor from '@/components/LobbyEditor';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import VerticalSlider from '@/components/ui/VerticalSlider';
 import Button from '@/components/ui/Button';
 import TextInput from '@/components/ui/TextInput';
 import Switch from '@/components/ui/Switch';
+import { hsvToHex } from '@/utils/colors';
 
 interface NewLobbyProps {
   userId: string;
+  initialH?: number;
+  initialS?: number;
+  initialV?: number;
 }
 
-const NewLobbyView: React.FC<NewLobbyProps> = ({ userId }) => {
+const NewLobbyView: React.FC<NewLobbyProps> = ({
+  userId,
+  initialH = 40,
+  initialS = 77,
+  initialV = 90
+}) => {
   const scrollableRef = useAnimatedRef<Animated.ScrollView>();
   const router = useRouter();
 
@@ -28,6 +39,10 @@ const NewLobbyView: React.FC<NewLobbyProps> = ({ userId }) => {
   const [title, setTitle] = useState<string>('');
   const [viewersCanEdit, setViewersCanEdit] = useState<boolean>(true);
   const [loadingMsg, setLoadingMsg] = useState<string | null>(null);
+
+  const [hValue, setHValue] = useState<number>(initialH);
+  const [sValue, setSValue] = useState<number>(initialS);
+  const [vValue, setVValue] = useState<number>(initialV);
 
   const handlePickImages = async () => {
     setLoadingMsg('Processing images...');
@@ -51,6 +66,7 @@ const NewLobbyView: React.FC<NewLobbyProps> = ({ userId }) => {
     await submitNewLobby(
       userId,
       title,
+      hexColor,
       viewersCanEdit,
       images,
       (lobbyId) => router.push(`/lobby/${lobbyId}`)
@@ -60,23 +76,61 @@ const NewLobbyView: React.FC<NewLobbyProps> = ({ userId }) => {
     setTitle('');
     setViewersCanEdit(true);
   };
-  console.log(images)
+
+  const hexColor = hsvToHex(hValue, sValue, vValue);
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView className="h-screen w-screen" edges={['top']}>
+      <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+        <GradientBackground color={hexColor} />
         <LoadingOverlay show={loadingMsg !== null} text={loadingMsg} />
         <Animated.ScrollView
           ref={scrollableRef}
-          style={{ height: '100%', width: '100%' }}
+          style={{ height: '100%', width: '100%', paddingVertical: 10 }}
         >
           <View style={{
             display: 'flex',
             minHeight: '100%',
             width: '100%',
-            paddingVertical: 30,
+            paddingVertical: 0,
             justifyContent: images.length === 0 ? 'center' : 'flex-start',
           }}>
+
+            <View style={styles.sliderContainer}>
+              <VerticalSlider
+                width={15}
+                height={170}
+                value={hValue}
+                onChange={(newH) => setHValue(newH)}
+                min={0}
+                max={360}
+                step={1}
+                showIndicator
+                indicatorLabel="H"
+              />
+              <VerticalSlider
+                width={15}
+                height={170}
+                value={sValue}
+                onChange={(newS) => setSValue(newS)}
+                min={0}
+                max={100}
+                step={1}
+                showIndicator
+                indicatorLabel="S"
+              />
+              <VerticalSlider
+                width={15}
+                height={170}
+                value={vValue}
+                onChange={(newV) => setVValue(newV)}
+                min={0}
+                max={100}
+                step={1}
+                showIndicator
+                indicatorLabel="V"
+              />
+            </View>
             <Text
               style={{
                 display: images.length === 0 ? 'flex' : 'none',
@@ -102,7 +156,7 @@ const NewLobbyView: React.FC<NewLobbyProps> = ({ userId }) => {
               />
               <Switch
                 className="mb-4"
-                label="Viewers can edit"
+                label="Viewers can upload"
                 value={viewersCanEdit}
                 onChange={() => setViewersCanEdit((previousState) => !previousState)}
               />
@@ -117,6 +171,7 @@ const NewLobbyView: React.FC<NewLobbyProps> = ({ userId }) => {
             <LobbyEditor
               images={images}
               setImages={setImages}
+              backgroundColor={hexColor}
               scrollRef={scrollableRef}
               isLoading={loadingMsg == null}
             />
@@ -128,7 +183,15 @@ const NewLobbyView: React.FC<NewLobbyProps> = ({ userId }) => {
 }
 
 const styles = StyleSheet.create({
-
+  sliderContainer: {
+    marginTop: 60,
+    marginBottom: 80,
+    display: 'flex',
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'center',
+    gap: 80,
+  },
 });
 
 export default NewLobbyView;

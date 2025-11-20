@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Link } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { getTimeDifference } from '@/utils/datetime';
 
 // TO DO implement environments
 const hostname = 'http://localhost:8787';
@@ -86,24 +87,43 @@ const LobbyGallery: React.FC<LobbyGalleryProps> = ({ lobbies, spacing = 10 }) =>
             {item.title}
           </Text>
         </View>
+        <View style={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          backgroundColor: '#00000089',
+          paddingLeft: 10,
+          paddingRight: 15,
+          paddingVertical: 10,
+          borderTopRightRadius: 10,
+        }}>
+          <Text style={{
+            color: '#FFF',
+            fontWeight: 600,
+            fontSize: 12,
+            textAlign: 'left',
+            fontFamily: 'AkkuratMono',
+          }}>
+            {getTimeDifference(item.createdOn, true)}
+          </Text>
+        </View>
       </TouchableOpacity>
     </Link>
   );
 
   return (
-     <ScrollView style={{ flex: 1 }}>
-      <FlatList
-        key={`flatlist-${columns}cols`}
-        data={lobbies}
-        renderItem={renderThumbnail}
-        keyExtractor={(item, index) => index.toString()}
-        numColumns={columns}
-        contentContainerStyle={{
-          padding: spacing / 2,
-        }}
-        showsVerticalScrollIndicator={false}
-      />
-     </ScrollView>
+    <FlatList
+      key={`flatlist-${columns}cols`}
+      style={{ paddingVertical: 10 }}
+      data={lobbies}
+      renderItem={renderThumbnail}
+      keyExtractor={(item, index) => index.toString()}
+      numColumns={columns}
+      contentContainerStyle={{
+        padding: spacing / 2,
+      }}
+      showsVerticalScrollIndicator={false}
+    />
   );
 };
 

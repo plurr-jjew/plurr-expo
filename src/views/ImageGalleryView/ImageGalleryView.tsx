@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { Link } from 'expo-router';
 import { Toast } from 'toastify-react-native';
 import QRCode from 'react-native-qrcode-svg';
 
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
-import { addImagesToLobby } from '@/services/lobby';
+import { addImagesToLobby, joinLobby } from '@/services/lobby';
 import { pickImages } from '@/utils/imagePicker';
 import ImageGallery from '@/components/ImageGallery';
 import Button from '@/components/ui/Button';
 import ExpandableModal from '@/components/ExpandableModal';
 import IconButton from '@/components/ui/IconButton';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import { GradientBackground } from '@/components/ui/Gradients';
 
 interface ImageGalleryViewProps {
   _id: string;
@@ -21,6 +23,8 @@ interface ImageGalleryViewProps {
   firstUploadOn: string | null;
   ownerId: string;
   title: string;
+  isJoined: boolean;
+  backgroundColor: string;
   lobbyCode: string;
   initialImages: ImageEntry[];
   viewersCanEdit: boolean;
@@ -35,11 +39,14 @@ const ImageGalleryView: React.FC<ImageGalleryViewProps> = ({
   firstUploadOn,
   ownerId,
   title,
+  isJoined: initialIsJoined,
+  backgroundColor,
   lobbyCode,
   initialImages,
   viewersCanEdit,
 }) => {
   const [images, setImages] = useState<ImageEntry[]>(initialImages);
+  const [isJoined, setIsJoined] = useState<boolean>(initialIsJoined);
   const [loading, setLoading] = useState<boolean>(false);
   const [qrCodeOpen, setQrCodeOpen] = useState<boolean>(false);
 
@@ -63,14 +70,22 @@ const ImageGalleryView: React.FC<ImageGalleryViewProps> = ({
     await pickImages(onPickImage);
     setLoading(false);
   };
-  // console.log('imagegalleryview', initialImages, images)
+
+  const handleJoin = async () => {
+    await joinLobby(_id, (err, newIsJoined) => {
+      if (err || typeof newIsJoined !== 'boolean') {
+        Toast.error('Failed to join lobby');
+        return;
+      }
+      setIsJoined(newIsJoined);
+    });
+  }
 
   return (
-    <View className="relative flex justify-center items-center flex-1 px-2 py-6 bg-white gap-2">
+    <View style={styles.container}>
       <LoadingOverlay show={loading} />
+      <GradientBackground color={backgroundColor} />
       <Text style={styles.titleText}>{title}</Text>
-
-      <ImageGallery images={images.map((image) => `${hostname}/image/${_id}/${image._id}`)} />
       <View className="flex flex-row gap-20 mb-3 justify-center align-center">
         <Link href={`/lobby/${_id}/edit`} asChild>
           <IconButton Icon={<MaterialIcons name="edit-note" size={24} color="black" />} />
@@ -83,6 +98,13 @@ const ImageGalleryView: React.FC<ImageGalleryViewProps> = ({
           onPress={() => setQrCodeOpen(true)}
           Icon={<MaterialIcons name="qr-code-2" size={24} color="black" />}
         />
+        <IconButton
+          onPress={handleJoin}
+          Icon={isJoined ?
+            <FontAwesome name="bookmark" size={24} color="black" /> :
+            <FontAwesome name="bookmark-o" size={24} color="black" />
+          }
+        />
       </View>
       <ExpandableModal
         visible={qrCodeOpen}
@@ -91,14 +113,27 @@ const ImageGalleryView: React.FC<ImageGalleryViewProps> = ({
       >
         <QRCode
           value={`plurr.it/lobby/${_id}`}
-          // logo={require('@/../assets/images/plurr-logo.png')}
+        // logo={require('@/../assets/images/plurr-logo.png')}
         />
       </ExpandableModal>
+
+      <ImageGallery
+        images={images.map((image) => ({
+          ...image,
+          url: `${hostname}/image/${_id}/${image._id}`,
+        }))}
+        backgroundColor={backgroundColor}
+      />
+
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: Platform.OS === 'web' ? 20 : 55
+  },
   titleText: {
     fontFamily: 'AkkuratMono',
     fontSize: 24,

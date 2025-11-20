@@ -16,15 +16,15 @@ const LogoutPage: React.FC = () => {
 
   useEffect(() => {
     if (session?.user.id && !isPending) {
-      // handleSignOut();
+      handleSignOut();
     }
   }, [session, isPending]);
   
 
   if (rootNavigationState?.key && !isPending) {
-    // if (session?.user.id) {
-    //   handleSignOut();
-    // }
+    if (session?.user.id) {
+      handleSignOut();
+    }
     return <Redirect href="/" />;
   }
 

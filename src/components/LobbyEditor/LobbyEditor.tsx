@@ -18,6 +18,7 @@ interface LobbyEditorProps {
   images: ImageEntry[];
   setImages: Dispatch<SetStateAction<ImageEntry[]>>;
   onImageDelete?: (id: string) => void;
+  backgroundColor: string;
   scrollRef: any;
   isLoading?: boolean;
 }
@@ -26,6 +27,7 @@ const LobbyEditor: React.FC<LobbyEditorProps> = ({
   images,
   setImages,
   onImageDelete,
+  backgroundColor,
   scrollRef,
   isLoading = false,
 }) => {
@@ -119,6 +121,7 @@ const LobbyEditor: React.FC<LobbyEditorProps> = ({
       >
         <ImageCarousel
           images={images.map((image) => image.url)}
+          backgroundColor={backgroundColor}
           initialSelectedIndex={selectedIndex}
           closeModal={closeModal}
         />

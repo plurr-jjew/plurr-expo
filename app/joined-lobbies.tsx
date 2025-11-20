@@ -3,9 +3,8 @@ import { Redirect, useRootNavigationState, useRouter } from 'expo-router';
 import { Toast } from 'toastify-react-native';
 
 import { authClient } from '@/services/auth';
-import { getUserLobbies } from '@/services/lobby';
-import MyLobbiesView from '@/views/MyLobbiesView';
-
+import { getJoinedLobbies } from '@/services/lobby';
+import JoinedLobbiesView from '@/views/JoinedLobbiesView';
 const MyLobbiesPage: React.FC = () => {
   const router = useRouter();
   const rootNavigationState = useRootNavigationState();
@@ -15,7 +14,7 @@ const MyLobbiesPage: React.FC = () => {
 
   useEffect(() => {
     if (session?.user.id) {
-      getUserLobbies(session.user.id, (err, lobbyList) => {
+      getJoinedLobbies(session.user.id, (err, lobbyList) => {
         if (err || !lobbyList) {
           Toast.error('Failed to fetch lobbies');
           router.push('/');
@@ -35,7 +34,7 @@ const MyLobbiesPage: React.FC = () => {
   if (!session?.user.id) {
     return null;
   }
-  return <MyLobbiesView lobbies={lobbies} />;
+  return <JoinedLobbiesView lobbies={lobbies} />;
 };
 
 export default MyLobbiesPage;

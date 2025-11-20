@@ -17,7 +17,9 @@
         "expo-asset",
         {
           "assets": [
-            "./assets/images/plurr-logo.png"
+            "./assets/images/plurr-logo.png",
+            "./assets/images/right-paren.svg",
+            "./assets/images/left-paren.svg"
           ]
         }
       ],

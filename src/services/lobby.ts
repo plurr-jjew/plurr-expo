@@ -3,6 +3,7 @@ import { Toast } from 'toastify-react-native';
 
 import { authClient } from './auth';
 import { addImagesToFormData } from '@/utils/lobby';
+import { getAuthRequestOptions } from './utils';
 
 declare global {
   interface LobbyEntry {
@@ -15,12 +16,14 @@ declare global {
     title: string;
     viewersCanEdit: boolean;
     images: ImageEntry[];
+    backgroundColor: string;
   }
 
   interface ImageEntry {
     _id: string;
     url: string;
     reactionString?: string;
+    currentUserReaction?: string;
   }
 }
 
@@ -63,11 +66,30 @@ export const getUserLobbies = async (
   cb: (err: Error | null, lobbyList: LobbyEntry[] | null) => void,
 ): Promise<void> => {
   try {
-    const requestOptions = {
-      method: 'GET',
-    };
+    const requestOptions = await getAuthRequestOptions({ method: 'GET' });
 
     const lobbyRes = await fetch(`${hostname}/lobby/user/${userId}`, requestOptions);
+    if (lobbyRes.status !== 200) {
+      cb(new Error('Failed to get lobbies'), null);
+      return;
+    }
+
+    const lobbyList = await lobbyRes.json();
+    cb(null, lobbyList);
+  } catch (error) {
+    console.error(error);
+    cb(new Error('Failed to get lobbies'), null);
+  }
+};
+
+export const getJoinedLobbies = async (
+  userId: string,
+  cb: (err: Error | null, lobbyList: LobbyEntry[] | null) => void,
+): Promise<void> => {
+  try {
+    const requestOptions = await getAuthRequestOptions({ method: 'GET' });
+
+    const lobbyRes = await fetch(`${hostname}/joined-lobbies`, requestOptions);
     if (lobbyRes.status !== 200) {
       cb(new Error('Failed to get lobbies'), null);
       return;
@@ -91,9 +113,9 @@ export const getLobbyData = async (
   cb: (err: Error | null, entry: LobbyEntry | null) => void
 ): Promise<void> => {
   try {
-    const requestOptions = {
+    const requestOptions = await getAuthRequestOptions({
       method: 'GET',
-    };
+    });
     const lobbyRes = await fetch(`${hostname}/lobby/id/${id}`, requestOptions);
     if (lobbyRes.status === 404) {
       Toast.error('Lobby not found');
@@ -119,6 +141,7 @@ export const getLobbyData = async (
 export const submitNewLobby = async (
   userId: string,
   title: string,
+  backgroundColor: string,
   viewersCanEdit: boolean,
   images: ImageEntry[],
   cb: (lobbyId: string) => void,
@@ -128,6 +151,7 @@ export const submitNewLobby = async (
     formdata.append('ownerId', userId);
     formdata.append('viewersCanEdit', viewersCanEdit.toString());
     formdata.append('title', title);
+    formdata.append('backgroundColor', backgroundColor);
 
     await addImagesToFormData(formdata, images);
     let cookies;
@@ -142,15 +166,16 @@ export const submitNewLobby = async (
     else {
       cookies = authClient.getCookie();
     }
+    console.log(cookies)
 
     const requestOptions = {
       method: 'POST',
       body: formdata,
       'Content-Type': 'multipart/form-data',
       credentials: 'omit' as RequestCredentials,
-      headers: {
-        'Cookie': cookies,
-      },
+      // headers: {
+      //   'Cookie': cookies,
+      // },
     };
 
     const submitRes = await fetch(`${hostname}/lobby`, requestOptions);
@@ -236,6 +261,28 @@ export const addImagesToLobby = async (
   } catch (error) {
     console.error(error);
     Toast.error('Failed to add images.');
+  }
+};
+
+export const joinLobby = async (
+  lobbyId: string,
+  cb: (err: Error | null, isJoined: boolean | null) => void
+) => {
+  try {
+    const requestOptions = await getAuthRequestOptions({ method: 'PUT' });
+
+    const lobbyRes = await fetch(`${hostname}/lobby/id/${lobbyId}/join`, requestOptions);
+    if (lobbyRes.status !== 200) {
+      cb(new Error('Failed to join lobby'), null);
+      return;
+    }
+
+    const isJoined = await lobbyRes.json();
+    console.log(isJoined)
+    cb(null, isJoined);
+  } catch (error) {
+    console.error(error);
+    cb(new Error('Failed to join lobby'), null);
   }
 };
 

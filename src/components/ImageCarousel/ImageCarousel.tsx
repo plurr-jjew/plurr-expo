@@ -6,20 +6,24 @@ import {
   FlatList,
   StatusBar,
   Text,
+  useWindowDimensions 
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Entypo from '@expo/vector-icons/Entypo';
-import { useWindowDimensions } from 'react-native';  // Hook to get the current screen size
+
+import { GradientBackground } from '@/components/ui/Gradients';
 
 interface ImageCarouselProps {
   images: string[];
+  backgroundColor: string;
   initialSelectedIndex: number;
   closeModal: () => void;
 }
 
 const ImageCarousel: React.FC<ImageCarouselProps> = ({
   images,
+  backgroundColor,
   initialSelectedIndex,
   closeModal
 }) => {
@@ -45,7 +49,8 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#000' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
+      <GradientBackground color={backgroundColor} />
       <StatusBar hidden />
       <TouchableOpacity
         style={{ position: 'absolute', top: 50, right: 20, zIndex: 10, padding: 10, borderRadius: 25, backgroundColor: 'rgba(0, 0, 0, 0.6)' }}

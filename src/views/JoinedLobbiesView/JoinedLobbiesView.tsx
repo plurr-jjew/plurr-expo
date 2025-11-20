@@ -13,20 +13,20 @@ interface MyLobbiesProps {
   lobbies: LobbyEntry[];
 }
 
-const MyLobbiesView: React.FC<MyLobbiesProps> = ({ lobbies }) => {
+const JoinedLobbies: React.FC<MyLobbiesProps> = ({ lobbies }) => {
   return (
     <View style={styles.container}>
       <GradientBackground color="#a8d4f3ff" />
       <View style={styles.headerContainer}>
-        <Text style={styles.title}>My Lobbies</Text>
-        <Link href="/new-lobby" asChild>
+        <Text style={styles.title}>Joined Lobbies</Text>
+        {/* <Link href="/new-lobby" asChild>
           <TouchableOpacity style={styles.button}>
             <ParensWrap>
               <Text style={{ fontFamily: 'dubsteptrix'}}>+</Text>
               <FontAwesome6 name="images" size={24} color="black" />
             </ParensWrap>
           </TouchableOpacity>
-        </Link>
+        </Link> */}
       </View>
       <LobbyGallery lobbies={lobbies} />
     </View>
@@ -66,4 +66,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default MyLobbiesView;
+export default JoinedLobbies;

@@ -38,12 +38,15 @@ const EditLobbyPage = () => {
   }, []);
 
   if (lobbyData && typeof lobbyId === 'string') {
-    return <EditLobbyView
-      lobbyId={lobbyId}
-      initialImages={images}
-      initialTitle={lobbyData.title}
-      initialViewersCanEdit={lobbyData.viewersCanEdit}
-    />;
+    return (
+      <EditLobbyView
+        lobbyId={lobbyId}
+        backgroundColor={lobbyData.backgroundColor}
+        initialImages={images}
+        initialTitle={lobbyData.title}
+        initialViewersCanEdit={lobbyData.viewersCanEdit}
+      />
+    );
   }
 }
 

@@ -1,17 +1,50 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Animated, StyleSheet } from 'react-native';
+import { Toast } from 'toastify-react-native';
+
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-const EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '😡'];
+import { handleReact } from '@/services/image';
 
-export default function ReactionButton({ onReact, styles: _styles }) {
-  const [selected, setSelected] = useState<string | null>(null);
+const EMOJIS = ['😃', '😍', '😂', '😳', '🤪', '🕺'];
+
+interface ReactionButtonProps {
+  styles?: any;
+  imageId: string;
+  reactionString: string;
+  initialReaction: string | null;
+  onReact?: (likeType: string) => void;
+}
+
+const ReactionButton: React.FC<ReactionButtonProps> = ({
+  styles: _styles,
+  imageId,
+  reactionString: initialReactionString,
+  initialReaction,
+  onReact,
+}) => {
+  const [selected, setSelected] = useState<string | null>(initialReaction);
+  const [reactionString, setReactionString] = useState<string>(initialReactionString)
   const [menuVisible, setMenuVisible] = useState(false);
   const scaleAnim = new Animated.Value(0);
 
-  const handleLike = () => {
-    setSelected('👍');
-    onReact?.('👍');
+  const handleReactionRes = (
+    reactionRes: { reactionString: string, userReaction: string | null } | null,
+    err: Error | null,
+  ) => {
+    if (err || !reactionRes) {
+      Toast.error('Failed to react to image');
+      return;
+    }
+    setSelected(reactionRes?.userReaction);
+    setReactionString(reactionRes?.reactionString);
+    console.log('reactionRes:', reactionRes)
+  };
+
+  const handleLike = async () => {
+    console.log('handle like')
+    await handleReact(imageId, 'like', handleReactionRes);
+    onReact?.('like');
   };
 
   const handleLongPress = () => {
@@ -23,8 +56,8 @@ export default function ReactionButton({ onReact, styles: _styles }) {
     }).start();
   };
 
-  const handleSelectEmoji = (emoji: string) => {
-    setSelected(emoji);
+  const handleSelectEmoji = async (emoji: string) => {
+    await handleReact(imageId, emoji, handleReactionRes);
     onReact?.(emoji);
     Animated.timing(scaleAnim, {
       toValue: 0,
@@ -38,11 +71,17 @@ export default function ReactionButton({ onReact, styles: _styles }) {
       <TouchableOpacity
         onPress={handleLike}
         onLongPress={handleLongPress}
+        delayLongPress={200}
         style={styles.button}
       >
-        {/* <Ionicons name="heart-sharp" size={24} color="black" /> */}
-        <Ionicons name="heart-outline" size={24} color="white" />
-        <Text style={styles.buttonText}>{selected || '👍'} 10</Text>
+        {selected ?
+          <Ionicons name="heart-sharp" size={24} color="#f23232ff" />
+          :
+          <Ionicons name="heart-outline" size={24} color="black" />
+        }
+        <Text style={styles.buttonText}>
+          {reactionString}
+        </Text>
       </TouchableOpacity>
 
       {menuVisible && (
@@ -69,33 +108,32 @@ export default function ReactionButton({ onReact, styles: _styles }) {
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'center',
+    width: 80,
   },
   button: {
-    backgroundColor: 'rgba(6, 6, 6, 0.65)ff',
+    position: 'relative',
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    borderTopRightRadius: 15,
-    paddingVertical: 10,
-    paddingLeft: 10,
-    paddingRight: 15,
     elevation: 3,
   },
   buttonText: {
     fontSize: 14,
     fontWeight: 600,
-    color: '#FFF',
+    color: '#000',
   },
   menu: {
     position: 'absolute',
-    bottom: 45,
-    left: 0,
+    bottom: 25,
+    left: -10,
     width: 170,
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
     gap: 10,
     backgroundColor: '#00000087',
     borderRadius: 30,
@@ -112,3 +150,6 @@ const styles = StyleSheet.create({
     fontSize: 26,
   },
 });
+
+export default ReactionButton;
+

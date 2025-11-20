@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, Alert, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, Alert, ActivityIndicator, StyleSheet } from 'react-native';
+import { useRouter, Link } from 'expo-router';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { Toast } from 'toastify-react-native';
@@ -14,9 +14,11 @@ import Button from '@/components/ui/Button';
 import IconButton from '@/components/ui/IconButton';
 import TextInput from '@/components/ui/TextInput';
 import Switch from '@/components/ui/Switch';
+import { GradientBackground } from '@/components/ui/Gradients';
 
 interface EditLobbyProps {
   lobbyId: string;
+  backgroundColor: string;
   initialImages: ImageEntry[];
   initialTitle: string;
   initialViewersCanEdit: boolean;
@@ -24,6 +26,7 @@ interface EditLobbyProps {
 
 const EditLobbyView: React.FC<EditLobbyProps> = ({
   lobbyId,
+  backgroundColor,
   initialImages,
   initialTitle,
   initialViewersCanEdit,
@@ -59,7 +62,8 @@ const EditLobbyView: React.FC<EditLobbyProps> = ({
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView className="flex h-screen w-screen" edges={['top']}>
+      <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+        <GradientBackground color={backgroundColor} />
         <Animated.ScrollView
           ref={scrollableRef}
           style={{
@@ -69,7 +73,7 @@ const EditLobbyView: React.FC<EditLobbyProps> = ({
             paddingVertical: 15,
           }}
         >
-          <Text className="text-3xl font-bold mb-6 text-center">Edit Lobby</Text>
+          <Text style={styles.title}>Edit Lobby</Text>
           <IconButton
             className="absolute right-3 top-0"
             Icon={<MaterialIcons name="delete" size={24} color="black" />}
@@ -89,22 +93,47 @@ const EditLobbyView: React.FC<EditLobbyProps> = ({
               value={viewersCanEdit}
               onChange={() => setViewersCanEdit((previousState) => !previousState)}
             />
-            <Button
-              title="Save changes"
-              LeadingIcon={<Entypo name="save" size={20} color="white" />}
-              onPress={handleSubmitChanges}
-            />
+            <View style={{
+              display: 'flex',
+              flexDirection: 'row',
+              gap: 3,
+              marginTop: 10,
+              marginBottom: 15,
+            }}>
+              <Button
+                title="Save"
+                LeadingIcon={<Entypo name="save" size={20} color="white" />}
+                onPress={handleSubmitChanges}
+              />
+              <Link href={`/lobby/${lobbyId}`} asChild>
+                <Button
+                  title="Cancel"
+                  variant="text"
+                />
+              </Link>
+            </View>
           </View>
           <LobbyEditor
             images={images}
             setImages={setImages}
             onImageDelete={onImageDelete}
+            backgroundColor={backgroundColor}
             scrollRef={scrollableRef}
           />
         </Animated.ScrollView>
       </SafeAreaView>
     </SafeAreaProvider>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  title: {
+    fontFamily: 'dubsteptrix',
+    fontSize: 32,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 35,
+  }
+})
 
 export default EditLobbyView;
