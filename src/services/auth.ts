@@ -5,15 +5,14 @@ import { phoneNumberClient } from 'better-auth/client/plugins'
 
 import * as SecureStore from 'expo-secure-store';
 
-// TO DO: implement endpoints corresponding to envs
-const hostname = 'http://localhost:8787';
+const hostname = process.env.EXPO_PUBLIC_API_URL;
 
 export const authClient = createAuthClient({
   baseURL: hostname, // Base URL of your Better Auth backend.
   plugins: [
     expoClient({
       scheme: 'plurr',
-      storagePrefix: 'myapp',
+      storagePrefix: 'plurr',
       storage: SecureStore,
     }),
     phoneNumberClient(),

@@ -3,12 +3,12 @@ import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import { Toast } from "toastify-react-native";
 
 export const pickImages = async (
-  cb: (err: Error | null, newImages: ImageEntry[] | null) => Promise<void> | void,
+  cb?: (err: Error | null, newImages: ImageEntry[] | null) => Promise<void> | void,
 ) => {
   const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!permissionResult.granted) {
     Toast.error("Permission required: Please allow photo access to upload images.");
-    return;
+    return null;
   }
 
   const result = await ImagePicker.launchImageLibraryAsync({
@@ -18,20 +18,24 @@ export const pickImages = async (
   });
 
   if (!result.canceled) {
-    const formatPromises = result.assets.map(async (asset) => {
+    const formatPromises = result.assets.map(async (asset, index) => {
       const context = ImageManipulator.manipulate(asset.uri);
-      context.resize({ height: 2000 });
-      const image = await context.renderAsync();
-      const result = await image.saveAsync({
+      const beforeImage = await context.renderAsync();
+      if (beforeImage.width > 1500) {
+      context.resize({ width: 1500 });
+      }
+
+      const newImage = await context.renderAsync();
+      const result = await newImage.saveAsync({
         format: SaveFormat.JPEG,
-        compress: 0.8,
+        compress: 0.6,
       });
       return {
-        _id: asset.assetId ? asset.assetId + Date.now() : asset.uri + Date.now(),
+        _id: asset.assetId ? `${asset.assetId}_${Date.now()}` : `image${index}_${Date.now()}`,
         url: result.uri,
       };
     });
-    const newImages = await Promise.all(formatPromises);
-    cb(null, newImages);
+    return await Promise.all(formatPromises);
   }
+  return null;
 };

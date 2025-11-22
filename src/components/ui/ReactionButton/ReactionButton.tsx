@@ -29,7 +29,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   const scaleAnim = new Animated.Value(0);
 
   const handleReactionRes = (
-    reactionRes: { reactionString: string, userReaction: string | null } | null,
+    reactionRes: { updatedReactionString: string, userReaction: string | null } | null,
     err: Error | null,
   ) => {
     if (err || !reactionRes) {
@@ -37,7 +37,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
       return;
     }
     setSelected(reactionRes?.userReaction);
-    setReactionString(reactionRes?.reactionString);
+    setReactionString(reactionRes?.updatedReactionString);
     console.log('reactionRes:', reactionRes)
   };
 

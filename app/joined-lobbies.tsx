@@ -5,7 +5,8 @@ import { Toast } from 'toastify-react-native';
 import { authClient } from '@/services/auth';
 import { getJoinedLobbies } from '@/services/lobby';
 import JoinedLobbiesView from '@/views/JoinedLobbiesView';
-const MyLobbiesPage: React.FC = () => {
+
+const JoinedLobbiesPage: React.FC = () => {
   const router = useRouter();
   const rootNavigationState = useRootNavigationState();
   const { data: session, isPending } = authClient.useSession();
@@ -37,4 +38,4 @@ const MyLobbiesPage: React.FC = () => {
   return <JoinedLobbiesView lobbies={lobbies} />;
 };
 
-export default MyLobbiesPage;
+export default JoinedLobbiesPage;

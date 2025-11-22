@@ -1,9 +1,10 @@
-import { Platform } from 'react-native';
 import { Toast } from 'toastify-react-native';
+import { fetch } from 'expo/fetch';
 
-import { authClient } from './auth';
 import { addImagesToFormData } from '@/utils/lobby';
 import { getAuthRequestOptions } from './utils';
+
+const hostname = process.env.EXPO_PUBLIC_API_URL;
 
 declare global {
   interface LobbyEntry {
@@ -14,6 +15,7 @@ declare global {
     firstImageId?: string;
     ownerId: string;
     title: string;
+    isJoined: boolean;
     viewersCanEdit: boolean;
     images: ImageEntry[];
     backgroundColor: string;
@@ -26,9 +28,6 @@ declare global {
     currentUserReaction?: string;
   }
 }
-
-// TO DO: implement endpoints corresponding to envs
-const hostname = 'http://localhost:8787';
 
 /**
  * 
@@ -132,6 +131,72 @@ export const getLobbyData = async (
   }
 };
 
+export const createLobbyDraft = async (
+  userId: string,
+  title: string,
+  backgroundColor: string,
+  viewersCanEdit: boolean,) => {
+  try {
+    const formdata = new FormData();
+    formdata.append('ownerId', userId);
+    formdata.append('viewersCanEdit', viewersCanEdit.toString());
+    formdata.append('title', title);
+    formdata.append('backgroundColor', backgroundColor);
+
+    const requestOptions = await getAuthRequestOptions({
+      method: 'POST',
+      body: formdata,
+      'Content-Type': 'multipart/form-data',
+    });
+
+    const draftRes = await fetch(`${hostname}/lobby/draft`, requestOptions);
+    const lobbyId = await draftRes.text();
+
+    return lobbyId ? lobbyId : null;
+  } catch (error) {
+    console.error(error);
+    Toast.error('Failed to create lobby.');
+    return null;
+  }
+};
+
+export const submitDraftLobby = async (
+  lobbyId: string,
+  userId: string,
+  title: string,
+  backgroundColor: string,
+  viewersCanEdit: boolean,
+  imageList: string[],
+  removedImageList: string[],
+) => {
+  try {
+    const formdata = new FormData();
+    formdata.append('ownerId', userId);
+    formdata.append('viewersCanEdit', viewersCanEdit.toString());
+    formdata.append('title', title);
+    formdata.append('backgroundColor', backgroundColor);
+    formdata.append('isDraft', false.toString());
+    formdata.append('images', JSON.stringify(imageList));
+    formdata.append('deletedImages', JSON.stringify(removedImageList));
+
+    const requestOptions = await getAuthRequestOptions({
+      method: 'PUT',
+      body: formdata,
+    });
+
+    const submitRes = await fetch(`${hostname}/lobby/id/${lobbyId}`, requestOptions);
+    if (submitRes.status !== 200) {
+      throw new Error('Server error');
+    }
+    return true;
+
+  } catch (error) {
+    console.error(error);
+    Toast.error('Failed to submit lobby.');
+    return false;
+  }
+};
+
 /**
  * 
  * @param title 
@@ -154,29 +219,11 @@ export const submitNewLobby = async (
     formdata.append('backgroundColor', backgroundColor);
 
     await addImagesToFormData(formdata, images);
-    let cookies;
-    if (Platform.OS === 'web') {
-      cookies = await window.cookieStore.getAll();
-      const { data: session, error } = await authClient.getSession();
-      if (session) {
-        const sessionToken = session.session.token;
-        console.log(session);
-      }
-    }
-    else {
-      cookies = authClient.getCookie();
-    }
-    console.log(cookies)
-
-    const requestOptions = {
+    const requestOptions = await getAuthRequestOptions({
       method: 'POST',
       body: formdata,
       'Content-Type': 'multipart/form-data',
-      credentials: 'omit' as RequestCredentials,
-      // headers: {
-      //   'Cookie': cookies,
-      // },
-    };
+    });
 
     const submitRes = await fetch(`${hostname}/lobby`, requestOptions);
     const submitData = await submitRes.json();
@@ -210,10 +257,10 @@ export const updateLobbyEntry = async (
     formdata.append('viewersCanEdit', viewersCanEdit.toString());
     formdata.append('deletedImages', JSON.stringify(deletedImages));
 
-    const requestOptions = {
+    const requestOptions = await getAuthRequestOptions({
       method: 'PUT',
       body: formdata,
-    };
+    });
 
     const updateRes = await fetch(`${hostname}/lobby/id/${lobbyId}`, requestOptions);
     Toast.success('Updated lobby sucessfully!')
@@ -239,10 +286,10 @@ export const addImagesToLobby = async (
     const formdata = new FormData();
     await addImagesToFormData(formdata, images);
 
-    const requestOptions = {
+    const requestOptions = await getAuthRequestOptions({
       method: 'PUT',
       body: formdata,
-    };
+    });
 
     const updateRes = await fetch(`${hostname}/lobby/id/${lobbyId}/upload`, requestOptions);
     if (updateRes.status !== 200) {
@@ -278,7 +325,6 @@ export const joinLobby = async (
     }
 
     const isJoined = await lobbyRes.json();
-    console.log(isJoined)
     cb(null, isJoined);
   } catch (error) {
     console.error(error);
@@ -291,9 +337,7 @@ export const deleteLobbyEntry = async (
   cb: (err: Error | null) => void,
 ) => {
   try {
-    const requestOptions = {
-      method: 'DELETE',
-    };
+    const requestOptions = await getAuthRequestOptions({ method: 'DELETE' });
 
     await fetch(`${hostname}/lobby/id/${lobbyId}`, requestOptions);
     cb(null);
@@ -301,4 +345,3 @@ export const deleteLobbyEntry = async (
     console.error(error);
   }
 };
-

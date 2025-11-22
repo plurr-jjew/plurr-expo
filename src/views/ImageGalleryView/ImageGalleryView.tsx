@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Link } from 'expo-router';
 import { Toast } from 'toastify-react-native';
 import QRCode from 'react-native-qrcode-svg';
@@ -29,9 +30,7 @@ interface ImageGalleryViewProps {
   initialImages: ImageEntry[];
   viewersCanEdit: boolean;
 }
-
-// TO DO implement environments
-const hostname = 'http://localhost:8787';
+const hostname = process.env.EXPO_PUBLIC_API_URL;
 
 const ImageGalleryView: React.FC<ImageGalleryViewProps> = ({
   _id,
@@ -82,57 +81,58 @@ const ImageGalleryView: React.FC<ImageGalleryViewProps> = ({
   }
 
   return (
-    <View style={styles.container}>
-      <LoadingOverlay show={loading} />
-      <GradientBackground color={backgroundColor} />
-      <Text style={styles.titleText}>{title}</Text>
-      <View className="flex flex-row gap-20 mb-3 justify-center align-center">
-        <Link href={`/lobby/${_id}/edit`} asChild>
-          <IconButton Icon={<MaterialIcons name="edit-note" size={24} color="black" />} />
-        </Link>
-        <IconButton
-          Icon={<MaterialCommunityIcons name="image-plus" size={24} color="black" />}
-          onPress={handleAddImages}
-        />
-        <IconButton
-          onPress={() => setQrCodeOpen(true)}
-          Icon={<MaterialIcons name="qr-code-2" size={24} color="black" />}
-        />
-        <IconButton
-          onPress={handleJoin}
-          Icon={isJoined ?
-            <FontAwesome name="bookmark" size={24} color="black" /> :
-            <FontAwesome name="bookmark-o" size={24} color="black" />
-          }
-        />
-      </View>
-      <ExpandableModal
-        visible={qrCodeOpen}
-        onClose={() => setQrCodeOpen(false)}
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        <LoadingOverlay show={loading} />
+        <GradientBackground color={backgroundColor} />
+        <Text style={styles.titleText}>{title}</Text>
+        <View className="flex flex-row gap-20 mb-3 justify-center align-center">
+          <Link href={`/lobby/${_id}/edit`} asChild>
+            <IconButton Icon={<MaterialIcons name="edit-note" size={24} color="black" />} />
+          </Link>
+          <IconButton
+            Icon={<MaterialCommunityIcons name="image-plus" size={24} color="black" />}
+            onPress={handleAddImages}
+          />
+          <IconButton
+            onPress={() => setQrCodeOpen(true)}
+            Icon={<MaterialIcons name="qr-code-2" size={24} color="black" />}
+          />
+          <IconButton
+            onPress={handleJoin}
+            Icon={isJoined ?
+              <FontAwesome name="bookmark" size={24} color="black" /> :
+              <FontAwesome name="bookmark-o" size={24} color="black" />
+            }
+          />
+        </View>
+        <ExpandableModal
+          visible={qrCodeOpen}
+          onClose={() => setQrCodeOpen(false)}
 
-      >
-        <QRCode
-          value={`plurr.it/lobby/${_id}`}
-        // logo={require('@/../assets/images/plurr-logo.png')}
+        >
+          <QRCode
+            value={`plurr.it/lobby/${_id}`}
+          // logo={require('@/../assets/images/plurr-logo.png')}
+          />
+        </ExpandableModal>
+
+        <ImageGallery
+          images={images.map((image) => ({
+            ...image,
+            url: `${hostname}/image/${_id}/${image._id}`,
+          }))}
+          backgroundColor={backgroundColor}
         />
-      </ExpandableModal>
-
-      <ImageGallery
-        images={images.map((image) => ({
-          ...image,
-          url: `${hostname}/image/${_id}/${image._id}`,
-        }))}
-        backgroundColor={backgroundColor}
-      />
-
-    </View>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Platform.OS === 'web' ? 20 : 55
+    paddingTop: 20,
   },
   titleText: {
     fontFamily: 'AkkuratMono',

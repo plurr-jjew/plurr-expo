@@ -21,7 +21,7 @@ const GradientBackground: React.FC<GradientBgProps> = ({
 
   let hexColor;
   if (hValue && sValue && vValue) {
-    hexColor = hsvToHex(hValue, sValue, vValue)
+    hexColor = hsvToHex(hValue, sValue, vValue !== 0 ? vValue : 1)
   } else if (color) {
     hexColor = color;
   } else {

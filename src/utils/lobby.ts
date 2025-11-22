@@ -10,10 +10,8 @@ import { File as _File, Paths } from 'expo-file-system';
  */
 export const addImagesToFormData = async (formdata: FormData, images: ImageEntry[]) => {
   const imagePromises = images.map(async (image, idx) => {
-    console.log(image)
     if (Platform.OS === 'web') {
       const res = await fetch(image.url);
-      console.log(res)
       const blob = await res.blob();
       const file = new File([blob], `image-${idx}.jpeg`, { type: 'image/jpeg' });
       formdata.append(`image${idx}`, file);

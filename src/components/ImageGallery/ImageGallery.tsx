@@ -98,7 +98,6 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
           imageId={item._id}
           reactionString={item.reactionString ? item.reactionString : '0'}
           initialReaction={item.currentUserReaction ? item.currentUserReaction : null}
-        
         />
       </View>
     </View>

@@ -7,8 +7,7 @@ import { getLobbyData } from '@/services/lobby';
 
 import EditLobbyView from '@/views/EditLobbyView';
 
-// TO DO implement environments
-const hostname = 'http://localhost:8787';
+const hostname = process.env.EXPO_PUBLIC_API_URL;
 
 const EditLobbyPage = () => {
   const router = useRouter();

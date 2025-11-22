@@ -1,13 +1,9 @@
 import React from 'react';
-import { StyleSheet, View, Text, Platform, TouchableOpacity } from 'react-native';
-import { Link } from 'expo-router';
-
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import { StyleSheet, View, Text, Platform, } from 'react-native';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 
 import LobbyGallery from '@/components/LobbyGallery/LobbyGallery';
-import Button from '@/components/ui/Button';
 import { GradientBackground } from '@/components/ui/Gradients';
-import ParensWrap from '@/components/ui/ParensWrap';
 
 interface MyLobbiesProps {
   lobbies: LobbyEntry[];
@@ -15,21 +11,15 @@ interface MyLobbiesProps {
 
 const JoinedLobbies: React.FC<MyLobbiesProps> = ({ lobbies }) => {
   return (
-    <View style={styles.container}>
+    <SafeAreaProvider>
+    <SafeAreaView style={styles.container}>
       <GradientBackground color="#a8d4f3ff" />
       <View style={styles.headerContainer}>
         <Text style={styles.title}>Joined Lobbies</Text>
-        {/* <Link href="/new-lobby" asChild>
-          <TouchableOpacity style={styles.button}>
-            <ParensWrap>
-              <Text style={{ fontFamily: 'dubsteptrix'}}>+</Text>
-              <FontAwesome6 name="images" size={24} color="black" />
-            </ParensWrap>
-          </TouchableOpacity>
-        </Link> */}
       </View>
       <LobbyGallery lobbies={lobbies} />
-    </View>
+    </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 
@@ -39,8 +29,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingTop: Platform.OS === 'ios' || 'anrdroid' ? 70 : 0,
+    paddingTop: Platform.OS === 'web' ? 30 : 10,
     flex: 1,
   },
   headerContainer: {
@@ -61,7 +50,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   title: {
-    fontFamily: 'dubsteptrix',
+    fontFamily: 'AkkuratMono',
     fontSize: 30,
   }
 });

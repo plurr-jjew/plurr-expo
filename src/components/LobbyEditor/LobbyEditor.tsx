@@ -52,6 +52,7 @@ const LobbyEditor: React.FC<LobbyEditorProps> = ({
   const handleImageDelete = (id: string) => () => {
     setImages((prev) => prev.filter((img) => img._id !== id));
     if (onImageDelete) {
+      console.log(onImageDelete);
       onImageDelete(id);
     }
   };

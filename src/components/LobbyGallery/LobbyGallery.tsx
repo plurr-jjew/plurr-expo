@@ -12,8 +12,7 @@ import { Link } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { getTimeDifference } from '@/utils/datetime';
 
-// TO DO implement environments
-const hostname = 'http://localhost:8787';
+const hostname = process.env.EXPO_PUBLIC_API_URL;
 
 type LobbyGalleryProps = {
   lobbies: LobbyEntry[]; // Array of image URIs (URLs)

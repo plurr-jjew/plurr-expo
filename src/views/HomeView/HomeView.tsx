@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Text, View, StyleSheet, } from 'react-native';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { useRouter, Link } from 'expo-router';
 import { Toast } from 'toastify-react-native';
@@ -9,6 +10,7 @@ import { authClient } from '@/services/auth';
 
 import Button from '@/components/ui/Button';
 import TextInput from '@/components/ui/TextInput';
+import DialKnob from '@/components/ui/DialKnob'
 import { GradientBackground } from '@/components/ui/Gradients';
 import VerticalSlider from '@/components/ui/VerticalSlider';
 import ParensWrap from '@/components/ui/ParensWrap';
@@ -33,20 +35,49 @@ const HomeView = () => {
       Toast.error('Please enter valid code');
     }
   };
-  
+
   return (
-    <View style={styles.container}>
-      <GradientBackground hValue={hValue} sValue={sValue} vValue={vValue} />
-      <View style={{ position: 'absolute', top: 60, left: 30, zIndex: 1000 }}>
-        <FloatingComponent>
-          <ParensWrap>
-            <Text style={{ fontSize: 24 }}>
-              🍓
-            </Text>
-          </ParensWrap>
-        </FloatingComponent>
-      </View>
-      <View style={styles.sliderContainer}>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        <GradientBackground
+          hValue={hValue}
+          sValue={sValue > 100 ? 200 - sValue : sValue}
+          vValue={vValue > 100 ? 200 - vValue : vValue}
+        />
+        <View style={{ position: 'absolute', top: 60, left: 30, zIndex: 1000 }}>
+          <FloatingComponent>
+            <ParensWrap>
+              <Text style={{ fontSize: 24 }}>
+                🍓
+              </Text>
+            </ParensWrap>
+          </FloatingComponent>
+        </View>
+        <View style={styles.knobContainer}>
+          <DialKnob
+            min={0}
+            max={360}
+            size={100}
+            value={hValue}
+            onValueChange={(newH) => setHValue(newH)}
+          />
+          <DialKnob
+            min={0}
+            max={200}
+            size={100}
+            value={sValue}
+            onValueChange={(newS) => setSValue(newS)}
+          />
+          <DialKnob
+            min={0}
+            max={200}
+            size={100}
+            value={vValue}
+            onValueChange={(newV) => setVValue(newV)}
+          />
+        </View>
+        {/* <View style={styles.sliderContainer}>
+
         <VerticalSlider
           width={15}
           height={170}
@@ -80,8 +111,8 @@ const HomeView = () => {
           showIndicator
           indicatorLabel="V"
         />
-      </View>
-      {/* <Image
+      </View> */}
+        {/* <Image
         source={require('@/../assets/images/plurr-logo.png')}
         style={{ width: 200, height: 100 }}
         contentFit='contain'
@@ -95,33 +126,38 @@ const HomeView = () => {
         Do Now.{`\n`}
         Connect Later.
       </Text> */}
-      <View style={styles.lobbyContainer}>
-        <TextInput
-          className="mb-4"
-          label="Lobby Code"
-          placeholder="ABC123"
-          value={lobbyCode}
-          maxLength={6}
-          onChangeText={setLobbyCode}
-          hasButton
-          buttonTitle='Join'
-          onButtonPress={handleJoinLobby}
-        />
-        <Link
-          href={{
-            pathname: '/new-lobby',
-            params: { h: hValue, s: sValue, v: vValue }
-          }}
-          asChild
-        >
-          <Button
-            className="mt-8"
-            fullWidth
-            title="Host Lobby"
+        <View style={styles.lobbyContainer}>
+          <TextInput
+            className="mb-4"
+            label="Lobby Code"
+            placeholder="ABC123"
+            value={lobbyCode}
+            maxLength={6}
+            onChangeText={setLobbyCode}
+            hasButton
+            buttonTitle='Join'
+            onButtonPress={handleJoinLobby}
           />
-        </Link>
-      </View>
-    </View>
+          <Link
+            href={{
+              pathname: '/new-lobby',
+              params: {
+                h: hValue,
+                s: sValue,
+                v: vValue
+              }
+            }}
+            asChild
+          >
+            <Button
+              className="mt-8"
+              fullWidth
+              title="Host Lobby"
+            />
+          </Link>
+        </View>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 
@@ -144,6 +180,16 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'center',
     gap: 80,
+  },
+  knobContainer: {
+    marginTop: 30,
+    marginBottom: 40,
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+    justifyContent: 'flex-end',
+    paddingRight: 20,
+    gap: 5,
   },
   lobbyContainer: {
     width: 250,

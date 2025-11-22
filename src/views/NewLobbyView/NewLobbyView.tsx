@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, DimensionValue } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
@@ -7,7 +7,8 @@ import { Toast } from 'toastify-react-native';
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
-import { submitNewLobby } from '@/services/lobby';
+import { createLobbyDraft, submitDraftLobby, submitNewLobby } from '@/services/lobby';
+import { uploadImage } from '@/services/image';
 import { pickImages } from '@/utils/imagePicker';
 
 import { GradientBackground } from '@/components/ui/Gradients';
@@ -18,12 +19,20 @@ import Button from '@/components/ui/Button';
 import TextInput from '@/components/ui/TextInput';
 import Switch from '@/components/ui/Switch';
 import { hsvToHex } from '@/utils/colors';
+import DialKnob from '@/components/ui/DialKnob';
 
 interface NewLobbyProps {
   userId: string;
   initialH?: number;
   initialS?: number;
   initialV?: number;
+}
+
+interface UploadedImages {
+  [key: string]: {
+    isUploadComplete: boolean;
+    dbId: string | null;
+  }
 }
 
 const NewLobbyView: React.FC<NewLobbyProps> = ({
@@ -35,26 +44,69 @@ const NewLobbyView: React.FC<NewLobbyProps> = ({
   const scrollableRef = useAnimatedRef<Animated.ScrollView>();
   const router = useRouter();
 
+  const [lobbyId, setLobbyId] = useState<string | null>(null);
   const [images, setImages] = useState<ImageEntry[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<UploadedImages>({});
+  const [removedImageIds, setRemovedImageIds] = useState<string[]>([]);
+
   const [title, setTitle] = useState<string>('');
   const [viewersCanEdit, setViewersCanEdit] = useState<boolean>(true);
-  const [loadingMsg, setLoadingMsg] = useState<string | null>(null);
 
   const [hValue, setHValue] = useState<number>(initialH);
   const [sValue, setSValue] = useState<number>(initialS);
   const [vValue, setVValue] = useState<number>(initialV);
 
+  const [loadingMsg, setLoadingMsg] = useState<string | null>(null);
+  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+
   const handlePickImages = async () => {
     setLoadingMsg('Processing images...');
-    await pickImages((err, newImages) => {
-      if (err || !newImages) {
+    const newImages = await pickImages();
+    setLoadingMsg(null);
+
+    if (!newImages) return;
+    setImages((prev) => [...prev, ...newImages]);
+    Toast.success(`Added ${newImages.length} images`);
+
+    let newLobbyId = lobbyId;
+    if (!newLobbyId) {
+      newLobbyId = await createLobbyDraft(
+        userId,
+        title,
+        hexColor,
+        viewersCanEdit,
+      );
+      if (!newLobbyId) {
         Toast.error('Failed to add images.');
         return;
       }
-      setImages((prev) => [...prev, ...newImages]);
-      Toast.success(`Added ${newImages.length} images`);
+      setLobbyId(newLobbyId);
+    }
+
+    const newUploadedImages: UploadedImages = uploadedImages;
+    newImages.forEach((image: ImageEntry) => {
+      newUploadedImages[image._id] = {
+        isUploadComplete: false,
+        dbId: null,
+      };
     });
-    setLoadingMsg(null);
+    setUploadedImages(newUploadedImages);
+
+    const uploadPromises = newImages.map(async (image) => {
+      const localId = image._id;
+      const dbImageId = await uploadImage(image, newLobbyId);
+      if (dbImageId) {
+        setUploadedImages((prev) => ({
+          ...prev,
+          [localId]: {
+            isUploadComplete: true,
+            dbId: dbImageId,
+          }
+        }));
+      }
+    });
+
+    await Promise.all(uploadPromises);
   };
 
   const handleCreateLobby = async () => {
@@ -63,22 +115,68 @@ const NewLobbyView: React.FC<NewLobbyProps> = ({
       return;
     }
     setLoadingMsg('Creating lobby...');
-    await submitNewLobby(
-      userId,
-      title,
-      hexColor,
-      viewersCanEdit,
-      images,
-      (lobbyId) => router.push(`/lobby/${lobbyId}`)
-    );
-    setLoadingMsg(null);
-    setImages([]);
-    setTitle('');
-    setViewersCanEdit(true);
+    setIsSubmitted(true);
   };
 
-  const hexColor = hsvToHex(hValue, sValue, vValue);
+  const hexColor = hsvToHex(
+    hValue,
+    sValue > 100 ? 200 - sValue : sValue,
+    vValue > 100 ? 200 - vValue : vValue
+  );
 
+  const handleSubmitDraft = async (imageList: string[], removedImageList: string[]) => {
+    if (lobbyId) {
+      const res = await submitDraftLobby(
+        lobbyId,
+        userId,
+        title,
+        hexColor,
+        viewersCanEdit,
+        imageList,
+        removedImageList,
+      );
+      setLoadingMsg(null);
+      setIsSubmitted(false);
+      console.log(res)
+      if (res) {
+        setImages([]);
+        setTitle('');
+        setViewersCanEdit(true);
+        router.push(`/lobby/${lobbyId}`);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (isSubmitted) {
+      const uploadValues = Object.values(uploadedImages);
+      const isUploadComplete = !uploadValues.some((image) =>
+        image.isUploadComplete === false || image.dbId === null
+      );
+      // console.log(uploadValues, isUploadComplete);
+      if (isUploadComplete) {
+        const imageList: string[] = [];
+        const removedImageList: string[] = [];
+
+        images.forEach((image) => {
+          const dbId = uploadedImages[image._id]?.dbId;
+          if (dbId) {
+            imageList.push(dbId);
+          }
+        });
+        removedImageIds.forEach((id) => {
+          const dbId = uploadedImages[id]?.dbId;
+          if (dbId) {
+            removedImageList.push(dbId);
+          }
+        });
+        console.log(imageList, removedImageList)
+        handleSubmitDraft(imageList, removedImageList);
+      }
+
+    }
+  }, [uploadedImages, isSubmitted]);
+  console.log(uploadedImages, images, removedImageIds)
   return (
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
@@ -95,9 +193,29 @@ const NewLobbyView: React.FC<NewLobbyProps> = ({
             paddingVertical: 0,
             justifyContent: images.length === 0 ? 'center' : 'flex-start',
           }}>
-
             <View style={styles.sliderContainer}>
-              <VerticalSlider
+              <DialKnob
+                min={0}
+                max={360}
+                size={100}
+                value={hValue}
+                onValueChange={(newH) => setHValue(newH)}
+              />
+              <DialKnob
+                min={0}
+                max={200}
+                size={100}
+                value={sValue}
+                onValueChange={(newS) => setSValue(newS)}
+              />
+              <DialKnob
+                min={0}
+                max={200}
+                size={100}
+                value={vValue}
+                onValueChange={(newV) => setVValue(newV)}
+              />
+              {/* <VerticalSlider
                 width={15}
                 height={170}
                 value={hValue}
@@ -129,7 +247,7 @@ const NewLobbyView: React.FC<NewLobbyProps> = ({
                 step={1}
                 showIndicator
                 indicatorLabel="V"
-              />
+              /> */}
             </View>
             <Text
               style={{
@@ -174,6 +292,7 @@ const NewLobbyView: React.FC<NewLobbyProps> = ({
               backgroundColor={hexColor}
               scrollRef={scrollableRef}
               isLoading={loadingMsg == null}
+              onImageDelete={(id) => setRemovedImageIds((prev) => [...prev, id])}
             />
           </View>
         </Animated.ScrollView>
@@ -190,7 +309,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: '100%',
     justifyContent: 'center',
-    gap: 80,
+    gap: 0,
   },
 });
 

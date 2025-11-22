@@ -12,8 +12,6 @@ const NewLobbyPage = () => {
   const local = useLocalSearchParams();
   const { data: session, isPending } = authClient.useSession();
 
-  console.log(local)
-
   if (rootNavigationState?.key && !session?.user.id && !isPending) {
     Toast.error('Please login to create lobby.');
     return <Redirect href="/" />;

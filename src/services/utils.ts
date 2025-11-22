@@ -1,29 +1,38 @@
 import { Platform } from 'react-native';
 
 import { authClient } from './auth';
+import { FetchRequestInit } from 'expo/fetch';
 
-export const getAuthRequestOptions = async (requestOptions: { [key: string]: object | string }) => {
-  let cookies;
+export const getAuthRequestOptions = async (
+  requestOptions?: { [key: string]: object | string },
+  headers?: { [key: string]: string }
+) => {
   if (Platform.OS === 'web') {
-    cookies = await window.cookieStore.getAll();
-    const { data: session, error } = await authClient.getSession();
-    return {
+    const { data: session } = await authClient.getSession();
+    const options: FetchRequestInit = {
       ...requestOptions,
       credentials: 'same-origin',
       headers: {
         'Authorization': `Bearer ${session?.session.token}`,
-        'Content-Type': 'application/json',
+        ...headers,
       }
     };
+    return options;
   }
-  else {
-    cookies = authClient.getCookie();
-    return {
+  else if (Platform.OS === 'ios' || Platform.OS === 'android') {
+    const cookies = authClient.getCookie();
+    const options: FetchRequestInit = {
       ...requestOptions,
       credentials: 'omit',
       headers: {
         'Cookie': cookies,
+        ...headers,
       }
     };
+    return options;
   }
+  return ({
+    ...requestOptions,
+    headers,
+  });
 };

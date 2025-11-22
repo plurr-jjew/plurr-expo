@@ -11,6 +11,7 @@ import { useRouter } from 'expo-router';
 import { Toast } from 'toastify-react-native';
 
 import { authClient } from '@/services/auth';
+import * as SecureStore from 'expo-secure-store';
 
 import TextInput from '@/components/ui/TextInput';
 import Button from '@/components/ui/Button';
@@ -60,15 +61,25 @@ const LoginView: React.FC = () => {
   const handleSubmitOtp = async (): Promise<void> => {
     if (otp.length === 6) {
       const { data, error } = await authClient.phoneNumber.verify({
-        phoneNumber: '+1' + phone.replace(/-/g, ''), // required
-        code: otp, // required
+        phoneNumber: '+1' + phone.replace(/-/g, ''),
+        code: otp,
         disableSession: false,
         updatePhoneNumber: false,
-      });
+      },
+        {
+          onSuccess: (ctx) => {
+            console.log(ctx)
+            const authToken = ctx.response.headers.get("set-auth-token") // get the token from the response headers
+            // Store the token securely (e.g., in localStorage)
+            console.log("bearer_token", authToken);
+          }
+        });
+      console.log('on submit otp', data)
       if (error) {
         Toast.error('Failed to verify code.');
         return;
       }
+
       Toast.success('Signed in!');
       router.push('/');
     }

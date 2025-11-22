@@ -9,7 +9,6 @@ import {
   useWindowDimensions 
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import Entypo from '@expo/vector-icons/Entypo';
 
 import { GradientBackground } from '@/components/ui/Gradients';
