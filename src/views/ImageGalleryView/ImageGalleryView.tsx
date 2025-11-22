@@ -9,8 +9,11 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
-import { addImagesToLobby, joinLobby } from '@/services/lobby';
+import { joinLobby, updateLobbyEntry } from '@/services/lobby';
+import { uploadImage } from '@/services/image';
+
 import { pickImages } from '@/utils/imagePicker';
+
 import ImageGallery from '@/components/ImageGallery';
 import Button from '@/components/ui/Button';
 import ExpandableModal from '@/components/ExpandableModal';
@@ -29,6 +32,7 @@ interface ImageGalleryViewProps {
   lobbyCode: string;
   initialImages: ImageEntry[];
   viewersCanEdit: boolean;
+  handleGetData: () => Promise<void>;
 }
 const hostname = process.env.EXPO_PUBLIC_API_URL;
 
@@ -43,31 +47,37 @@ const ImageGalleryView: React.FC<ImageGalleryViewProps> = ({
   lobbyCode,
   initialImages,
   viewersCanEdit,
+  handleGetData,
 }) => {
   const [images, setImages] = useState<ImageEntry[]>(initialImages);
   const [isJoined, setIsJoined] = useState<boolean>(initialIsJoined);
   const [loading, setLoading] = useState<boolean>(false);
   const [qrCodeOpen, setQrCodeOpen] = useState<boolean>(false);
-
-  const onPickImage = async (err: Error | null, newImages: ImageEntry[] | null) => {
-    if (err || !newImages) {
-      Toast.error('Failed to add images.');
-      return;
-    }
-    await addImagesToLobby(_id, newImages, (err, _newImages: ImageEntry[] | null) => {
-      if (err || !_newImages) {
-        Toast.error('Failed to add images.');
-        return;
-      }
-      setImages((prev) => [...prev, ..._newImages]);
-      Toast.success(`Added ${_newImages.length} images`)
-    });
-  };
-
+  console.log(images)
   const handleAddImages = async () => {
     setLoading(true);
-    await pickImages(onPickImage);
+    const newImages = await pickImages();
+
+    if (!newImages) return;
+    const uploadPromises = newImages.map(async (image) => {
+      const dbImageId = await uploadImage(image, _id);
+      return dbImageId;
+    });
+    const newImageIds = await Promise.all(uploadPromises);
+
+    const updateRes = await updateLobbyEntry(
+      _id,
+      {},
+      newImageIds,
+    );
+    if (!updateRes) {
+      Toast.error('Failed to add images.');
+      setLoading(false);
+      return;
+    }
+    await handleGetData();
     setLoading(false);
+    Toast.success(`Added ${newImages.length} images!`);
   };
 
   const handleJoin = async () => {

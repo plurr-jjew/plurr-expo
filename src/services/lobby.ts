@@ -160,43 +160,6 @@ export const createLobbyDraft = async (
   }
 };
 
-export const submitDraftLobby = async (
-  lobbyId: string,
-  userId: string,
-  title: string,
-  backgroundColor: string,
-  viewersCanEdit: boolean,
-  imageList: string[],
-  removedImageList: string[],
-) => {
-  try {
-    const formdata = new FormData();
-    formdata.append('ownerId', userId);
-    formdata.append('viewersCanEdit', viewersCanEdit.toString());
-    formdata.append('title', title);
-    formdata.append('backgroundColor', backgroundColor);
-    formdata.append('isDraft', false.toString());
-    formdata.append('images', JSON.stringify(imageList));
-    formdata.append('deletedImages', JSON.stringify(removedImageList));
-
-    const requestOptions = await getAuthRequestOptions({
-      method: 'PUT',
-      body: formdata,
-    });
-
-    const submitRes = await fetch(`${hostname}/lobby/id/${lobbyId}`, requestOptions);
-    if (submitRes.status !== 200) {
-      throw new Error('Server error');
-    }
-    return true;
-
-  } catch (error) {
-    console.error(error);
-    Toast.error('Failed to submit lobby.');
-    return false;
-  }
-};
-
 /**
  * 
  * @param title 
@@ -245,25 +208,25 @@ export const submitNewLobby = async (
  */
 export const updateLobbyEntry = async (
   lobbyId: string,
-  title: string,
-  images: ImageEntry[],
-  viewersCanEdit: boolean,
-  deletedImages: string[]
+  changes: { [key: string]: string | boolean | object },
+  addedImages?: string[],
+  deletedImages?: string[],
 ) => {
   try {
-    const formdata = new FormData();
-    formdata.append('title', title);
-    formdata.append('images', JSON.stringify(images.map((image) => image._id)));
-    formdata.append('viewersCanEdit', viewersCanEdit.toString());
-    formdata.append('deletedImages', JSON.stringify(deletedImages));
-
     const requestOptions = await getAuthRequestOptions({
       method: 'PUT',
-      body: formdata,
+      body: JSON.stringify({
+        addedImages,
+        deletedImages,
+        changes,
+      }),
+    }, {
+      "Content-Type": "application/json",
     });
 
     const updateRes = await fetch(`${hostname}/lobby/id/${lobbyId}`, requestOptions);
-    Toast.success('Updated lobby sucessfully!')
+    const updateJson = await updateRes.json();
+    return updateJson;
   } catch (error) {
     console.error(error);
     Toast.error('Failed to update lobby.');

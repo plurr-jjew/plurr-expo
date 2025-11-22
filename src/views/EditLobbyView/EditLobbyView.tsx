@@ -42,6 +42,7 @@ const EditLobbyView: React.FC<EditLobbyProps> = ({
 
   const onImageDelete = (id: string) => {
     setDeletedImages((prev) => [...prev, id]);
+    setImages(images.filter((image) => image._id !== id));
   };
 
   const handleDelete = async () => {
@@ -56,7 +57,21 @@ const EditLobbyView: React.FC<EditLobbyProps> = ({
   };
 
   const handleSubmitChanges = async () => {
-    await updateLobbyEntry(lobbyId, title, images, viewersCanEdit, deletedImages);
+    const res = await updateLobbyEntry(
+      lobbyId,
+      {
+        title,
+        viewersCanEdit,
+        images: images.map((image) => image._id), 
+      },
+      [],
+      deletedImages
+    );
+    if (!res) {
+      Toast.error('Failed to save chanages');
+      return;
+    }
+    Toast.success('Updated lobby!');
     router.push(`/lobby/${lobbyId}`);
   };
 

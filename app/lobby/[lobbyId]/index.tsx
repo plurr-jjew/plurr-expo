@@ -34,7 +34,7 @@ const LobbyPage = () => {
 
   if (lobbyData) {
     return (
-      <ImageGalleryView {...lobbyData} initialImages={lobbyData.images} />
+      <ImageGalleryView {...lobbyData} initialImages={lobbyData.images} handleGetData={handleGetData} />
     );
   }
 }

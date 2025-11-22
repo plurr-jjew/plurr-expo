@@ -22,7 +22,7 @@ export const pickImages = async (
       const context = ImageManipulator.manipulate(asset.uri);
       const beforeImage = await context.renderAsync();
       if (beforeImage.width > 1500) {
-      context.resize({ width: 1500 });
+        context.resize({ width: 1500 });
       }
 
       const newImage = await context.renderAsync();

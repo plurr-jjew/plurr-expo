@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, DimensionValue } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
@@ -7,7 +7,7 @@ import { Toast } from 'toastify-react-native';
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
-import { createLobbyDraft, submitDraftLobby, submitNewLobby } from '@/services/lobby';
+import { createLobbyDraft, updateLobbyEntry } from '@/services/lobby';
 import { uploadImage } from '@/services/image';
 import { pickImages } from '@/utils/imagePicker';
 
@@ -126,22 +126,26 @@ const NewLobbyView: React.FC<NewLobbyProps> = ({
 
   const handleSubmitDraft = async (imageList: string[], removedImageList: string[]) => {
     if (lobbyId) {
-      const res = await submitDraftLobby(
+      const res = await updateLobbyEntry(
         lobbyId,
-        userId,
-        title,
-        hexColor,
-        viewersCanEdit,
-        imageList,
+        {
+          title,
+          images: imageList,
+          backgroundColor: hexColor,
+          viewersCanEdit,
+          isDraft: false,
+        },
+        [],
         removedImageList,
       );
+      console.log(res)
       setLoadingMsg(null);
       setIsSubmitted(false);
-      console.log(res)
       if (res) {
         setImages([]);
         setTitle('');
         setViewersCanEdit(true);
+        Toast.success('Created new lobby!');
         router.push(`/lobby/${lobbyId}`);
       }
     }
@@ -153,7 +157,6 @@ const NewLobbyView: React.FC<NewLobbyProps> = ({
       const isUploadComplete = !uploadValues.some((image) =>
         image.isUploadComplete === false || image.dbId === null
       );
-      // console.log(uploadValues, isUploadComplete);
       if (isUploadComplete) {
         const imageList: string[] = [];
         const removedImageList: string[] = [];
@@ -170,13 +173,12 @@ const NewLobbyView: React.FC<NewLobbyProps> = ({
             removedImageList.push(dbId);
           }
         });
-        console.log(imageList, removedImageList)
         handleSubmitDraft(imageList, removedImageList);
       }
 
     }
   }, [uploadedImages, isSubmitted]);
-  console.log(uploadedImages, images, removedImageIds)
+
   return (
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
